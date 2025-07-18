@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <array>
 #include "robin_hood.h"
 #include "engine.h"
 
@@ -142,23 +143,23 @@ struct Location
 {
 	int x;
 	int y;
-	
+
 	int minAbs() { return std::min(std::abs(x), std::abs(y)); }
 	int maxAbs() { return std::max(std::abs(x), std::abs(y)); }
 	int absDiff() { return abs(abs(x) - abs(y)); }
-	
+
 	Location(int _x, int _y)
 	: x(_x), y(_y)
 	{}
 	Location()
 	: Location(-1, -1)
 	{}
-	
+
 	bool isValid()
 	{
 		return x != -1 && y != -1;
 	}
-	
+
 };
 bool operator==(const Location &o1, const Location &o2);
 bool operator!=(const Location &o1, const Location &o2);
@@ -182,30 +183,30 @@ struct Resource
 	double nutrient;
 	double mineral;
 	double energy;
-	
+
 	Resource(double _nutrient, double _mineral, double _energy)
 	: nutrient(_nutrient), mineral(_mineral), energy(_energy)
 	{}
-	
+
 	Resource()
 	: Resource(0.0, 0.0, 0.0)
 	{}
-	
+
 	static Resource combine(Resource const &o1, Resource const &o2)
 	{
 		return Resource(o1.nutrient + o2.nutrient, o1.mineral + o2.mineral, o1.energy + o2.energy);
 	}
-	
+
 };
 
 struct Income
 {
 	double income;
 	double incomeGrowth;
-	
+
 	Income() : income(0.0), incomeGrowth(0.0) {}
 	Income(double _income, double _incomeGrowth) : income(_income), incomeGrowth(_incomeGrowth) {}
-	
+
 };
 
 struct RangeTile

@@ -3,6 +3,7 @@
 #include "main.h"
 #include "wtp_mod.h"
 #include "robin_hood.h"
+#include <array>
 
 extern MAP *baseComputeExcludedTile;
 
