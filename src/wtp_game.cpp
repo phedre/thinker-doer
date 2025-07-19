@@ -26,7 +26,7 @@ bool operator!=(const Location &o1, const Location &o2)
 std::string getLocationString(Location location)
 {
 	std::ostringstream ss;
-	
+
 	ss
 		<< "("
 		<< std::dec << std::setw(3) << std::setfill(' ') << location.x
@@ -34,31 +34,31 @@ std::string getLocationString(Location location)
 		<< std::dec << std::setw(3) << std::setfill(' ') << location.y
 		<< ")"
 	;
-	
+
     return ss.str();
-    
+
 }
 
 std::string getLocationString(int tileIndex)
 {
 	// allow returning for incorrect index
-	
+
 	if (!(tileIndex >= 0 && tileIndex < *MapAreaTiles))
 		return "-nullptr-";
-	
+
 	return getLocationString(getLocation(tileIndex));
-	
+
 }
 
 std::string getLocationString(MAP *tile)
 {
 	// allow returning for nullptr
-	
+
 	if (tile == nullptr)
 		return "-nullptr-";
-	
+
 	return getLocationString(getLocation(tile));
-	
+
 }
 
 // =======================================================
@@ -146,9 +146,9 @@ int getOffsetIndex(MAP *tile1, MAP *tile2)
 {
 	assert(isOnMap(tile1));
 	assert(isOnMap(tile2));
-	
+
 	return getOffsetIndex(getX(tile1), getY(tile1), getX(tile2), getY(tile2));
-	
+
 }
 
 // =======================================================
@@ -177,12 +177,12 @@ Computes location by map tile index.
 Location getLocation(int tileIndex)
 {
 	assert(tileIndex >= 0 && tileIndex < *MapAreaTiles);
-	
+
 	int y = tileIndex / (*MapHalfX);
 	int x = (tileIndex % (*MapHalfX)) * 2 + (y % 2);
-	
+
 	return {x, y};
-	
+
 }
 
 /**
@@ -191,13 +191,13 @@ Computes location by map tile.
 Location getLocation(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int mapIndex = tile - *MapTiles;
 	int y = mapIndex / (*MapHalfX);
 	int x = (mapIndex % (*MapHalfX)) * 2 + (y % 2);
-	
+
 	return {x, y};
-	
+
 }
 
 /**
@@ -232,9 +232,9 @@ Computes map tile index by location coordinates.
 int getMapTileIndex(int x, int y)
 {
 	assert(isOnMap(x, y));
-	
+
 	return ((*MapHalfX) * y + x / 2);
-	
+
 }
 
 /**
@@ -244,9 +244,9 @@ MAP *getMapTile(int x, int y)
 {
 	if (!isOnMap(x, y))
 		return nullptr;
-	
+
 	return *MapTiles + ((*MapHalfX) * y + x / 2);
-	
+
 }
 
 /**
@@ -256,12 +256,12 @@ Location getDelta(MAP *tile1, MAP *tile2)
 {
 	Location location1 = getLocation(tile1);
 	Location location2 = getLocation(tile2);
-	
+
 	int dx = location2.x - location1.x;
 	int dy = location2.y - location1.y;
-	
+
 	// wrap x coordinate for cylindric map
-	
+
 	if (!*MapToggleFlat)
 	{
 		if (dx < -*MapHalfX)
@@ -273,9 +273,9 @@ Location getDelta(MAP *tile1, MAP *tile2)
 			dx -= *MapAreaX;
 		}
 	}
-	
+
 	return {dx, dy};
-	
+
 }
 
 /**
@@ -285,19 +285,19 @@ Location getAbsoluteDelta(MAP *tile1, MAP *tile2)
 {
 	Location location1 = getLocation(tile1);
 	Location location2 = getLocation(tile2);
-	
+
 	int dx = abs(location2.x - location1.x);
 	int dy = abs(location2.y - location1.y);
-	
+
 	// wrap x coordinate for cylindric map
-	
+
 	if (!*MapToggleFlat && dx > *MapHalfX)
 	{
 		dx = *MapAreaX - dx;
 	}
-	
+
 	return {dx, dy};
-	
+
 }
 
 /*
@@ -346,20 +346,20 @@ Tiles not on the map are nullptr.
 std::vector<MapAngle> const getAdjacentMapAngles(MAP *tile)
 {
 	std::vector<MapAngle> adjacentMapAngles;
-	
+
 	for (int angle = 0; angle < ANGLE_COUNT; angle++)
 	{
 		MAP *adjacentTile = getTileByAngle(tile, angle);
-		
+
 		if (adjacentTile == nullptr)
 			continue;
-		
+
 		adjacentMapAngles.push_back({adjacentTile, angle});
-		
+
 	}
-	
+
 	return adjacentMapAngles;
-	
+
 }
 
 /**
@@ -369,26 +369,26 @@ std::vector<int> const getAdjacentTileIndexes(int tileIndex)
 {
 	int x = getX(tileIndex);
 	int y = getY(tileIndex);
-	
+
 	std::vector<int> adjacentTileIndexes;
-	
+
 	for (int angle = 0; angle < TABLE_next_cell_count; angle++)
 	{
 		int offsetX = TABLE_next_cell_x[angle];
 		int offsetY = TABLE_next_cell_y[angle];
-		
+
 		int nextCellX = wrap(x + offsetX);
 		int nextCellY = y + offsetY;
-		
+
 		if (!isOnMap(nextCellX, nextCellY))
 			continue;
-		
+
 		adjacentTileIndexes.push_back(getMapTileIndex(nextCellX, nextCellY));
-		
+
 	}
-	
+
 	return adjacentTileIndexes;
-	
+
 }
 
 /**
@@ -399,26 +399,26 @@ std::vector<MAP *> const getAdjacentTiles(MAP *tile)
 	Location location = getLocation(tile);
 	int x = location.x;
 	int y = location.y;
-	
+
 	std::vector<MAP *> adjacentTiles;
-	
+
 	for (int angle = 0; angle < TABLE_next_cell_count; angle++)
 	{
 		int offsetX = TABLE_next_cell_x[angle];
 		int offsetY = TABLE_next_cell_y[angle];
-		
+
 		int nextCellX = wrap(x + offsetX);
 		int nextCellY = y + offsetY;
-		
+
 		if (!isOnMap(nextCellX, nextCellY))
 			continue;
-		
+
 		adjacentTiles.push_back(getMapTile(nextCellX, nextCellY));
-		
+
 	}
-	
+
 	return adjacentTiles;
-	
+
 }
 
 /*
@@ -427,7 +427,7 @@ Returns tiles sharing a side with given tile.
 std::vector<MAP *> getSideTiles(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
 
@@ -458,29 +458,29 @@ Returns tiles from beginIndex (inclusive) to endIndex (exclusive).
 ArrayVector<MAP *, MAX_RANGE_TILE_COUNT> const &getSquareOffsetTiles(MAP *center, int beginIndex, int endIndex)
 {
 	assert(isOnMap(center));
-	
+
 	int x = getX(center);
 	int y = getY(center);
-	
+
 	RANGE_TILES.clear();
-	
+
 	for (int index = beginIndex; index < endIndex; index++)
 	{
 		int offsetX = TABLE_square_offset_x[index];
 		int offsetY = TABLE_square_offset_y[index];
-		
+
 		int cellX = wrap(x + offsetX);
 		int cellY = y + offsetY;
-		
+
 		if (!isOnMap(cellX, cellY))
 			continue;
-		
+
 		RANGE_TILES.push_back(getMapTile(cellX, cellY));
-		
+
 	}
-	
+
 	return RANGE_TILES;
-	
+
 }
 
 /**
@@ -492,32 +492,32 @@ ArrayVector<MAP *, MAX_RANGE_TILE_COUNT> const &getSquareBlockTiles(MAP *center,
 	assert(isOnMap(center));
 	assert(minRadius >= 0 && minRadius < TABLE_square_block_radius_count);
 	assert(maxRadius >= 0 && maxRadius < TABLE_square_block_radius_count);
-	
+
 	int x = getX(center);
 	int y = getY(center);
-	
+
 	int minIndex = (minRadius == 0 ? 0 : TABLE_square_block_radius[minRadius - 1]);
 	int maxIndex = TABLE_square_block_radius[maxRadius];
-	
+
 	RANGE_TILES.clear();
-	
+
 	for (int index = minIndex; index < maxIndex; index++)
 	{
 		int offsetX = TABLE_square_offset_x[index];
 		int offsetY = TABLE_square_offset_y[index];
-		
+
 		int cellX = wrap(x + offsetX);
 		int cellY = y + offsetY;
-		
+
 		if (!isOnMap(cellX, cellY))
 			continue;
-		
+
 		RANGE_TILES.push_back(getMapTile(cellX, cellY));
-		
+
 	}
-	
+
 	return RANGE_TILES;
-	
+
 }
 
 /**
@@ -531,32 +531,32 @@ ArrayVector<MAP *, MAX_RANGE_TILE_COUNT> const &getSquareBlockRadiusTiles(MAP *c
 	assert(isOnMap(center));
 	assert(minRadius >= 0 && minRadius < TABLE_square_block_radius_count);
 	assert(maxRadius >= 0 && maxRadius < TABLE_square_block_radius_count);
-	
+
 	int x = getX(center);
 	int y = getY(center);
-	
+
 	int minIndex = (minRadius == 0 ? 0 : TABLE_square_block_radius[minRadius - 1]);
 	int maxIndex = TABLE_square_block_radius[maxRadius];
-	
+
 	RANGE_TILES.clear();
-	
+
 	for (int index = minIndex; index < maxIndex; index++)
 	{
 		int offsetX = TABLE_square_offset_x[index];
 		int offsetY = TABLE_square_offset_y[index];
-		
+
 		int cellX = wrap(x + offsetX);
 		int cellY = y + offsetY;
-		
+
 		if (!isOnMap(cellX, cellY))
 			continue;
-		
+
 		RANGE_TILES.push_back(getMapTile(cellX, cellY));
-		
+
 	}
-	
+
 	return RANGE_TILES;
-	
+
 }
 
 /*
@@ -566,75 +566,75 @@ Returns reference to global variable. Not safe for nested use.
 ArrayVector<MAP *, MAX_RANGE_TILE_COUNT> const &getRangeTiles(MAP *tile, int range, bool includeCenter)
 {
 //	Profiling::start("- getRangeTiles");
-	
+
 	RANGE_TILES.clear();
-	
+
 	if (!(range >= 0 && range < MAX_RANGE))
 	{
 		debug("ERROR: assert failed: (range >= 0 && range < MAX_RANGE)\n");flushlog();
 		return RANGE_TILES;
 	}
-	
+
 	int squareBlockRange = std::min(TABLE_square_block_radius_count - 1, range);
-	
+
 	// populate range < TABLE_square_block_radius_count
-	
+
 	getSquareBlockRadiusTiles(tile, (includeCenter ? 0 : 1), squareBlockRange);
-	
+
 	// use normal computation
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
-	
+
 	for (int ringRange = squareBlockRange + 1; ringRange <= range; ringRange++)
 	{
 		int dMax = 2 * ringRange;
-		
+
 		for (int i = 0; i < dMax; i++)
 		{
 			int x0 = wrap(x - dMax + i);
 			int y0 = y + 0 - i;
-			
+
 			if (isOnMap(x0, y0))
 			{
 				MAP *tile0 = getMapTile(x0, y0);
 				RANGE_TILES.push_back(tile0);
 			}
-			
+
 			int x1 = wrap(x + 0 + i);
 			int y1 = y - dMax + i;
-			
+
 			if (isOnMap(x1, y1))
 			{
 				MAP *tile1 = getMapTile(x1, y1);
 				RANGE_TILES.push_back(tile1);
 			}
-			
+
 			int x2 = wrap(x + dMax - i);
 			int y2 = y + 0 + i;
-			
+
 			if (isOnMap(x2, y2))
 			{
 				MAP *tile2 = getMapTile(x2, y2);
 				RANGE_TILES.push_back(tile2);
 			}
-			
+
 			int x3 = wrap(x + 0 - i);
 			int y3 = y + dMax - i;
-			
+
 			if (isOnMap(x3, y3))
 			{
 				MAP *tile3 = getMapTile(x3, y3);
 				RANGE_TILES.push_back(tile3);
 			}
-			
+
 		}
-		
+
 	}
-	
+
 //	Profiling::stop("- getRangeTiles");
 	return RANGE_TILES;
-	
+
 }
 
 /*
@@ -643,24 +643,24 @@ Returns next range tile by given tile.
 bool nextRangeTile(MAP *center, int maxRange, bool includeCenter, RangeTile &rangeTile)
 {
 //	Profiling::start("- getNextRangeTile");
-	
+
 	int centerIndex = center - *MapTiles;
 	int centerY = centerIndex / (*MapHalfX);
 	int centerX = (centerIndex % (*MapHalfX)) * 2 + (centerY % 2);
-	
+
 	if (rangeTile.tile == nullptr)
 	{
 		rangeTile.dx = 0;
 		rangeTile.dy = 0;
 		rangeTile.tile = center;
-		
+
 		if (includeCenter)
 		{
 			return true;
 		}
-		
+
 	}
-	
+
 	int x;
 	int y;
 	bool onMap = false;
@@ -691,33 +691,33 @@ bool nextRangeTile(MAP *center, int maxRange, bool includeCenter, RangeTile &ran
 			rangeTile.dx++;
 			rangeTile.dy--;
 		}
-		
+
 		// advance to next range
-		
+
 		if (rangeTile.dx == 0 && rangeTile.dy < 0)
 		{
 			rangeTile.dy -= 2;
-			
+
 			// verify max range
-			
+
 			if ((-rangeTile.dy) / 2 > maxRange)
 			{
 				return false;
 			}
-			
+
 		}
-		
+
 		x = wrap(centerX + rangeTile.dx);
 		y = centerY + rangeTile.dy;
 		onMap = x >= 0 && x < *MapAreaX && y >= 0 && y < *MapAreaY && ((x + y) & 1) == 0;
-		
+
 	}
-	
+
 	int rangeTileIndex = (x + *MapAreaX * y) / 2;
 	rangeTile.tile = *MapTiles + rangeTileIndex;
-	
+
 	return true;
-	
+
 }
 
 std::vector<MAP *> getBaseOffsetTiles(int x, int y, int offsetBegin, int offsetEnd)
@@ -827,11 +827,11 @@ Base cost modifying facilites (Skunkworks and Brood Pits) are taken into account
 int getBaseItemCost(int baseId, int item)
 {
 	assert(baseId >= 0 && baseId < *BaseCount);
-	
+
 	BASE *base = getBase(baseId);
-	
+
 	int itemCost;
-	
+
 	if (item == - FAC_STOCKPILE_ENERGY)
 	{
 		itemCost = base->mineral_surplus;
@@ -844,13 +844,13 @@ int getBaseItemCost(int baseId, int item)
 	{
 		itemCost = Facility[-item].cost;
 	}
-	
+
 	return itemCost;
-	
+
 }
 
 int veh_triad(int id) {
-    return unit_triad(Vehicles[id].unit_id);
+    return unit_triad(Vehs[id].unit_id);
 }
 
 int veh_speed_without_roads(int id) {
@@ -864,7 +864,7 @@ int unit_chassis_speed(int id)
 
 int veh_chassis_speed(int id)
 {
-	VEH *vehicle = &Vehicles[id];
+	VEH *vehicle = &Vehs[id];
 	UNIT *unit = &Units[vehicle->unit_id];
 	CChassis *chassis = &Chassis[unit->chassis_id];
 	return chassis->speed;
@@ -898,7 +898,7 @@ bool unit_has_ability(int id, int ability) {
 }
 
 bool vehicle_has_ability(int vehicleId, int ability) {
-    return Units[Vehicles[vehicleId].unit_id].ability_flags & ability;
+    return Units[Vehs[vehicleId].unit_id].ability_flags & ability;
 }
 
 int map_rainfall(MAP *tile) {
@@ -950,90 +950,90 @@ NULL pointer returns false.
 bool map_has_landmark(MAP *tile, int landmark)
 {
 	// null pointer
-	
+
 	if (tile == nullptr)
 		return false;
-	
+
 	// ladmark should be present
-	
+
 	if ((tile->landmarks & landmark) == 0)
 		return false;
-	
+
 	// special conditions
-	
+
 	switch (landmark)
 	{
 	case LM_CRATER:
 		return (tile->code_at() < 9);
 		break;
-	
+
 	case LM_VOLCANO:
 		return (tile->code_at() < 9);
 		break;
-	
+
 	case LM_JUNGLE:
 		return (!is_ocean(tile));
 		break;
-	
+
 	case LM_URANIUM:
 		return true;
 		break;
-	
+
 	case LM_FRESH:
 		return (is_ocean(tile));
 		break;
-	
+
 	case LM_CANYON:
 		return true;
 		break;
-	
+
 	case LM_GEOTHERMAL:
 		return true;
 		break;
-	
+
 	case LM_RIDGE:
 		return true;
 		break;
-	
+
 	case LM_FOSSIL:
 		return (tile->code_at() < 6);
 		break;
-	
+
 	}
-	
+
 	return true;
-	
+
 }
 
 int isBonusAt(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
-	
+
 	return bonus_at(x, y) != RES_NONE;
-	
+
 }
 
 int getNutrientBonus(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
-	
+
 	int bonus = 0;
-	
+
 	// resource
-	
+
 	if (bonus_at(x, y) == 1)
 	{
 		bonus += ResInfo->bonus_sq.nutrient;
 	}
-	
+
 	// ladmarks
-	
+
 	if
 	(
 		map_has_landmark(tile, LM_JUNGLE)
@@ -1043,29 +1043,29 @@ int getNutrientBonus(MAP *tile)
 	{
 		bonus += 1;
 	}
-	
+
 	return bonus;
-	
+
 }
 
 int getMineralBonus(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
-	
+
 	int bonus = 0;
-	
+
 	// resource
-	
+
 	if (bonus_at(x, y) == 2)
 	{
 		bonus += ResInfo->bonus_sq.mineral;
 	}
-	
+
 	// ladmarks
-	
+
 	if
 	(
 		map_has_landmark(tile, LM_CRATER)
@@ -1079,29 +1079,29 @@ int getMineralBonus(MAP *tile)
 	{
 		bonus += 1;
 	}
-	
+
 	return bonus;
-	
+
 }
 
 int getEnergyBonus(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
-	
+
 	int bonus = 0;
-	
+
 	// resource
-	
+
 	if (bonus_at(x, y) == 3)
 	{
 		bonus += ResInfo->bonus_sq.energy;
 	}
-	
+
 	// ladmarks
-	
+
 	if
 	(
 		map_has_landmark(tile, LM_VOLCANO)
@@ -1113,15 +1113,15 @@ int getEnergyBonus(MAP *tile)
 	{
 		bonus += 1;
 	}
-	
+
 	return bonus;
-	
+
 }
 
 bool isLandmarkBonus(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	return
 		map_has_landmark(tile, LM_JUNGLE)
 		||
@@ -1139,7 +1139,7 @@ bool isLandmarkBonus(MAP *tile)
 		||
 		map_has_landmark(tile, LM_URANIUM)
 	;
-	
+
 }
 
 /*
@@ -1297,54 +1297,54 @@ double getUnitPsiOffenseStrength(int factionId, int unitId)
 	Faction *faction = getFaction(factionId);
 	UNIT *unit = &(Units[unitId]);
 	int triad = unit->triad();
-	
+
 	// initial value
-	
+
 	double psiOffenseStrength = (double)Rules->psi_combat_ratio_atk[triad] / (double)Rules->psi_combat_ratio_def[triad];
-	
+
 	// faction PLANET rating modifier
-	
+
 	psiOffenseStrength *= getPercentageBonusMultiplier(Rules->combat_psi_bonus_per_planet * faction->SE_planet_pending);
-	
+
 	// abilities modifier
-	
+
 	if (isUnitHasAbility(unitId, ABL_EMPATH))
 	{
 		psiOffenseStrength *= getPercentageBonusMultiplier(Rules->combat_bonus_empath_song_vs_psi);
 	}
-	
+
 	// return strength
-	
+
 	return psiOffenseStrength;
-	
+
 }
 
 double getUnitPsiDefenseStrength(int factionId, int unitId)
 {
 	Faction *faction = getFaction(factionId);
-	
+
 	// initial value
-	
+
 	double psiDefenseStrength = 1.0;
-	
+
 	// faction PLANET rating modifier
-	
+
 	if (conf.planet_defense_bonus)
 	{
 		psiDefenseStrength *= getPercentageBonusMultiplier(Rules->combat_psi_bonus_per_planet * faction->SE_planet_pending);
 	}
-	
+
 	// abilities modifier
-	
+
 	if (isUnitHasAbility(unitId, ABL_TRANCE))
 	{
 		psiDefenseStrength *= getPercentageBonusMultiplier(Rules->combat_bonus_trance_vs_psi);
 	}
-	
+
 	// return strength
-	
+
 	return psiDefenseStrength;
-	
+
 }
 
 double getUnitConOffenseStrength(int unitId)
@@ -1375,24 +1375,24 @@ double getNewUnitPsiOffenseStrength(int unitId, int baseId)
 {
 	BASE *base = &(Bases[baseId]);
 	int factionId = base->faction_id;
-	
+
 	double psiOffenseStrength = getUnitPsiOffenseStrength(factionId, unitId);
 	double moraleMultiplier = getMoraleMultiplier(getNewVehicleMorale(unitId, baseId));
-	
+
 	return psiOffenseStrength * moraleMultiplier;
-	
+
 }
 
 double getNewUnitPsiDefenseStrength(int unitId, int baseId)
 {
 	BASE *base = &(Bases[baseId]);
 	int factionId = base->faction_id;
-	
+
 	double psiDefenseStrength = getUnitPsiDefenseStrength(factionId, unitId);
 	double moraleMultiplier = getMoraleMultiplier(getNewVehicleMorale(unitId, baseId));
-	
+
 	return psiDefenseStrength * moraleMultiplier;
-	
+
 }
 
 double getNewUnitConOffenseStrength(int unitId, int baseId)
@@ -1401,16 +1401,16 @@ double getNewUnitConOffenseStrength(int unitId, int baseId)
 	double moraleMultiplier = getMoraleMultiplier(getNewVehicleMorale(unitId, baseId));
 
 	return conOffenseStrength * moraleMultiplier;
-	
+
 }
 
 double getNewUnitConDefenseStrength(int unitId, int baseId)
 {
 	double conDefenseStrength = getUnitConDefenseStrength(unitId);
 	double moraleMultiplier = getMoraleMultiplier(getNewVehicleMorale(unitId, baseId));
-	
+
 	return conDefenseStrength * moraleMultiplier;
-	
+
 }
 
 double getVehiclePsiOffenseStrength(int vehicleId, bool ignoreDamage)
@@ -1418,58 +1418,58 @@ double getVehiclePsiOffenseStrength(int vehicleId, bool ignoreDamage)
 	VEH *vehicle = getVehicle(vehicleId);
 	int factionId = vehicle->faction_id;
 	int unitId = vehicle->unit_id;
-	
+
 	// unit psi offense strength
-	
+
 	double psiOffenseStrength = getUnitPsiOffenseStrength(factionId, unitId);
-	
+
 	// morale modifier
-	
+
 	psiOffenseStrength *= getVehicleMoraleMultiplier(vehicleId);
-	
+
 	// damage modifier
-	
+
 	if (!ignoreDamage)
 	{
 		psiOffenseStrength *= getVehicleRelativePower(vehicleId);
 	}
-	
+
 	// return strength
-	
+
 	return psiOffenseStrength;
-	
+
 }
 
 double getVehiclePsiDefenseStrength(int vehicleId, bool ignoreDamage)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 	int factionId = vehicle->faction_id;
 	int unitId = vehicle->unit_id;
-	
+
 	// psi defense strength
-	
+
 	double psiDefenseStrength = getUnitPsiDefenseStrength(factionId, unitId);
-	
+
 	// morale modifier
-	
+
 	psiDefenseStrength *= getVehicleMoraleMultiplier(vehicleId);
-	
+
 	// damage modifier
-	
+
 	if (!ignoreDamage)
 	{
 		psiDefenseStrength *= getVehicleRelativePower(vehicleId);
 	}
-	
+
 	// return strength
-	
+
 	return psiDefenseStrength;
-	
+
 }
 
 double getVehicleConOffenseStrength(int vehicleId, bool ignoreDamage)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	// unit with psi weapon does not initiate conventional offense
 
@@ -1485,12 +1485,12 @@ double getVehicleConOffenseStrength(int vehicleId, bool ignoreDamage)
 	conventionalOffenseStrength *= getVehicleMoraleMultiplier(vehicleId);
 
 	// damage modifier
-	
+
 	if (!ignoreDamage)
 	{
 		conventionalOffenseStrength *= getVehicleRelativePower(vehicleId);
 	}
-	
+
 	// return strength
 
 	return conventionalOffenseStrength;
@@ -1499,7 +1499,7 @@ double getVehicleConOffenseStrength(int vehicleId, bool ignoreDamage)
 
 double getVehicleConDefenseStrength(int vehicleId, bool ignoreDamage)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	// unit with psi armor does not initiate conventional defense
 
@@ -1518,7 +1518,7 @@ double getVehicleConDefenseStrength(int vehicleId, bool ignoreDamage)
 	{
 		conventionalDefenseStrength *= getVehicleRelativePower(vehicleId);
 	}
-	
+
 	// return strength
 
 	return conventionalDefenseStrength;
@@ -1572,18 +1572,18 @@ double getPsiCombatBaseOdds(int triad)
 bool isCombatUnit(int unitId)
 {
 	assert(unitId >= 0);
-	
+
 	// fungal tower is considered non combat unit as it does not attack
 	return getUnitOffenseValue(unitId) != 0 && unitId != BSC_FUNGAL_TOWER;
-	
+
 }
 
 bool isCombatVehicle(int vehicleId)
 {
 	assert(vehicleId >= 0);
-	
+
 	return isCombatUnit(getVehicle(vehicleId)->unit_id);
-	
+
 }
 
 bool isUtilityVehicle(int vehicleId)
@@ -1608,7 +1608,7 @@ bool isOgreUnit(int unitId)
 bool isOgreVehicle(int vehicleId)
 {
 	assert(vehicleId >= 0 && vehicleId < *VehCount);
-	return isOgreUnit(Vehicles[vehicleId].unit_id);
+	return isOgreUnit(Vehs[vehicleId].unit_id);
 }
 
 /*
@@ -1616,8 +1616,8 @@ Calculates average maximal damage vehicle delivers to enemy in psi combat when a
 */
 double calculatePsiDamageAttack(int vehicleId, int enemyVehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
-	VEH *enemyVehicle = &(Vehicles[enemyVehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
+	VEH *enemyVehicle = &(Vehs[enemyVehicleId]);
 
 	// calculate base damage (vehicle attacking)
 
@@ -1662,8 +1662,8 @@ Calculates average maximal damage unit delivers to enemy in psi combat when defe
 */
 double calculatePsiDamageDefense(int vehicleId, int enemyVehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
-	VEH *enemyVehicle = &(Vehicles[enemyVehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
+	VEH *enemyVehicle = &(Vehs[enemyVehicleId]);
 
 	// calculate base damage (vehicle defending)
 
@@ -1710,7 +1710,7 @@ VehOrder getVehicleOrder(int vehicleId)
 
 void setVehicleOrder(int id, int order)
 {
-	VEH *vehicle = &(Vehicles[id]);
+	VEH *vehicle = &(Vehs[id]);
 
     vehicle->order = order;
     vehicle->status_icon = VehStatusIcon[order];
@@ -1727,36 +1727,36 @@ void setVehicleOrder(int id, int order)
 int getBaseMapTileIndex(int baseId)
 {
 	BASE *base = &(Bases[baseId]);
-	
+
 	return getMapTileIndex(base->x, base->y);
-	
+
 }
 
 MAP *getBaseMapTile(int baseId)
 {
 	BASE *base = &(Bases[baseId]);
-	
+
 	return getMapTile(base->x, base->y);
-	
+
 }
 
 int getVehicleMapTileIndex(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
-	
+	VEH *vehicle = &(Vehs[vehicleId]);
+
 	return getMapTileIndex(vehicle->x, vehicle->y);
-	
+
 }
 
 MAP *getVehicleMapTile(int vehicleId)
 {
 	if (!(vehicleId >= 0 && vehicleId < *VehCount))
 		return nullptr;
-	
-	VEH &vehicle = Vehicles[vehicleId];
-	
+
+	VEH &vehicle = Vehs[vehicleId];
+
 	return getMapTile(vehicle.x, vehicle.y);
-	
+
 }
 
 /*
@@ -1777,7 +1777,7 @@ bool isSupplyUnit(int unitId)
 }
 bool isSupplyVehicle(int vehicleId)
 {
-	return isSupplyUnit(Vehicles[vehicleId].unit_id);
+	return isSupplyUnit(Vehs[vehicleId].unit_id);
 }
 
 bool isColonyUnit(int id)
@@ -1792,12 +1792,12 @@ bool isArtifactUnit(int unitId)
 
 bool isArtifactVehicle(int id)
 {
-	return (Units[Vehicles[id].unit_id].weapon_id == WPN_ALIEN_ARTIFACT);
+	return (Units[Vehs[id].unit_id].weapon_id == WPN_ALIEN_ARTIFACT);
 }
 
 bool isColonyVehicle(int id)
 {
-	return (Units[Vehicles[id].unit_id].weapon_id == WPN_COLONY_MODULE);
+	return (Units[Vehs[id].unit_id].weapon_id == WPN_COLONY_MODULE);
 }
 
 bool isFormerUnit(int unitId)
@@ -1807,7 +1807,7 @@ bool isFormerUnit(int unitId)
 
 bool isFormerVehicle(int vehicleId)
 {
-	return isFormerVehicle(&(Vehicles[vehicleId]));
+	return isFormerVehicle(&(Vehs[vehicleId]));
 }
 bool isFormerVehicle(VEH *vehicle)
 {
@@ -1820,7 +1820,7 @@ bool isConvoyUnit(int unitId)
 }
 bool isConvoyVehicle(int vehicleId)
 {
-	return isConvoyUnit(Vehicles[vehicleId].unit_id);
+	return isConvoyUnit(Vehs[vehicleId].unit_id);
 }
 
 bool isTransportVehicle(VEH *vehicle)
@@ -1835,7 +1835,7 @@ bool isTransportUnit(int unitId)
 
 bool isTransportVehicle(int vehicleId)
 {
-	return (Units[Vehicles[vehicleId].unit_id].weapon_id == WPN_TROOP_TRANSPORT);
+	return (Units[Vehs[vehicleId].unit_id].weapon_id == WPN_TROOP_TRANSPORT);
 }
 
 bool isSeaTransportUnit(int unitId)
@@ -1856,7 +1856,7 @@ bool isVehicleProbe(VEH *vehicle)
 
 bool isVehicleIdle(int vehicleId)
 {
-	return (Vehicles[vehicleId].order == ORDER_NONE);
+	return (Vehs[vehicleId].order == ORDER_NONE);
 }
 
 bool isMeleeUnit(int unitId)
@@ -1904,23 +1904,23 @@ Base compute may not pick optimal worker placement without worked tile reset.
 void computeBase(int baseId, bool resetWorkedTiles, MAP *excludedTile)
 {
 	assert(baseId >= 0 && baseId < *BaseCount);
-	
+
 	Profiling::start("- computeBase");
-	
+
 	if (resetWorkedTiles)
 	{
 		Bases[baseId].worked_tiles = 0;
 		Bases[baseId].specialist_total = 0;
 		Bases[baseId].specialist_adjust = 0;
 	}
-	
+
 	set_base(baseId);
 	baseComputeExcludedTile = excludedTile;
 	base_compute(1);
 	baseComputeExcludedTile = nullptr;
-	
-	Profiling::stop("- computeBase");	
-	
+
+	Profiling::stop("- computeBase");
+
 }
 
 /*
@@ -2102,7 +2102,7 @@ extendedTriad: 0 = land, 1 = sea, 2 = air, 3 = psi, 4 = probe
 double getBaseDefenseMultiplier(int baseId, int extendedTriad)
 {
 	int defenseBonus = 0;
-	
+
 	switch (extendedTriad)
 	{
 	case 4:
@@ -2117,7 +2117,7 @@ double getBaseDefenseMultiplier(int baseId, int extendedTriad)
 		{
 			bool firstLevelDefense = has_facility(TRIAD_DEFENSIVE_FACILITIES[extendedTriad], baseId);
 			bool secondLevelDefense = has_facility(FAC_TACHYON_FIELD, baseId);
-			
+
 			if (!firstLevelDefense && !secondLevelDefense)
 			{
 				defenseBonus = Rules->combat_bonus_intrinsic_base_def;
@@ -2132,25 +2132,25 @@ double getBaseDefenseMultiplier(int baseId, int extendedTriad)
 				{
 					defenseBonus += conf.facility_defense_bonus[3];
 				}
-				
+
 			}
-			
+
 		}
 		break;
-		
+
 	}
-		
+
 	return getPercentageBonusMultiplier(defenseBonus);
-	
+
 }
 
 double getBaseDefenseMultiplier(int baseId, int attackerUnitId, int defenderUnitId)
 {
 	UNIT *attackerUnit = getUnit(attackerUnitId);
 	int attackerUnitTriad = attackerUnit->triad();
-	
+
 	return getBaseDefenseMultiplier(baseId, isPsiCombat(attackerUnitId, defenderUnitId) ? 3 : attackerUnitTriad);
-	
+
 }
 
 int estimateBaseItemProductionTime(int baseId, int item)
@@ -2175,17 +2175,17 @@ int estimateBaseProductionTurnsToComplete(int id)
 MAP *getBaseWorkerTile(int baseId, int workerNumber)
 {
 	assert(workerNumber >=0 && workerNumber < 21);
-	
+
 	BASE const &base = Bases[baseId];
-	
+
 	int dx = OFFSETS[workerNumber][0];
 	int dy = OFFSETS[workerNumber][1];
-	
+
 	int x = wrap(base.x + dx);
 	int y = base.y + dy;
-	
+
 	return isOnMap(x, y) ? getMapTile(x, y) : nullptr;
-	
+
 }
 
 /*
@@ -2228,20 +2228,20 @@ std::vector<MAP *> getBaseWorkedTiles(int baseId)
 int getBaseWorkerCount(int baseId)
 {
 	BASE *base = &(Bases[baseId]);
-	
+
 	int workerCount = 0;
-	
+
 	for (int offsetIndex = 1; offsetIndex < OFFSET_COUNT_RADIUS; offsetIndex++)
 	{
 		if ((base->worked_tiles & (0x1 << offsetIndex)) != 0)
 		{
 			workerCount++;
 		}
-		
+
 	}
-	
+
 	return workerCount;
-	
+
 }
 
 bool isBaseWorkedTile(int baseId, int x, int y)
@@ -2278,12 +2278,12 @@ bool isBaseWorkedTile(int baseId, int x, int y)
 bool isBaseWorkedTile(int baseId, MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
-	
+
 	return isBaseWorkedTile(baseId, x, y);
-	
+
 }
 
 /**
@@ -2292,36 +2292,36 @@ Returns faction available units.
 std::vector<int> getFactionUnitIds(int factionId, bool includeObsolete, bool includeNotPrototyped)
 {
 	std::vector<int> factionUnitIds;
-	
+
 	// alien units are always the same
-	
+
 	if (factionId == 0)
 		return ALIEN_UNITS;
-	
+
 	// iterate faction units
-	
+
     for (int slot = 0; slot < 2 * MaxProtoFactionNum; slot++)
 	{
         int unitId = getUnitIdBySlot(factionId, slot);
-		
+
 		// skip not available
-		
+
 		if (!isAvailableUnit(unitId, factionId, includeObsolete))
 			continue;
-		
+
 		// do not include not prototyped if not requested
-		
+
 		if (!includeNotPrototyped && !isPrototypedUnit(unitId))
 			continue;
-		
+
 		// add unit
-		
+
 		factionUnitIds.push_back(unitId);
-		
+
 	}
-	
+
 	return factionUnitIds;
-	
+
 }
 
 /*
@@ -2359,7 +2359,7 @@ Determines if vehicle is a native land predefined unit.
 */
 bool isVehicleNativeLand(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 	int unitId = vehicle->unit_id;
 
 	return
@@ -2576,7 +2576,7 @@ std::vector<int> getBaseGarrison(int baseId)
 
 	for (int vehicleId : getStackVehicleIds(topStackVehicleId))
 	{
-		VEH *vehicle = &(Vehicles[vehicleId]);
+		VEH *vehicle = &(Vehs[vehicleId]);
 
 		// only this faction units
 
@@ -2613,7 +2613,7 @@ std::vector<int> getBaseInfantryDefenderGarrison(int baseId)
 
 	for (int vehicleId : getTileVehicleIds(baseTile))
 	{
-		VEH *vehicle = &(Vehicles[vehicleId]);
+		VEH *vehicle = &(Vehs[vehicleId]);
 
 		// only this faction units
 
@@ -2703,12 +2703,12 @@ This accounts for vehicle morale.
 */
 double getVehicleBaseNativeProtection(int baseId, int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 	MAP *baseTile = getBaseMapTile(baseId);
 
 	// unit native protection
 
-	double nativeProtection = estimateUnitBaseLandNativeProtection(Vehicles[vehicleId].unit_id, vehicle->faction_id, is_ocean(baseTile));
+	double nativeProtection = estimateUnitBaseLandNativeProtection(Vehs[vehicleId].unit_id, vehicle->faction_id, is_ocean(baseTile));
 
 	// add morale
 
@@ -2781,7 +2781,7 @@ Assuming vehicle will heal in full at base.
 */
 double getVehicleBaseNativeProtectionPotential(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	// calculate base damage (vehicle defending)
 
@@ -2815,7 +2815,7 @@ Assuming vehicle will heal in full at base.
 */
 double getVehicleBaseNativeProtectionEfficiency(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	// calculate protection potential
 
@@ -2898,40 +2898,40 @@ int getBasePoliceCount(int baseId, bool police2x)
 {
 	BASE *base = getBase(baseId);
 	MAP *baseTile = getBaseMapTile(baseId);
-	
+
 	int policeCount = 0;
-	
+
 	for (int vehicleId : getTileVehicleIds(baseTile))
 	{
 		VEH *vehicle = getVehicle(vehicleId);
-		
+
 		// same faction
-		
+
 		if (vehicle->faction_id != base->faction_id)
 			continue;
-		
+
 		// combat
-		
+
 		if (!isCombatVehicle(vehicleId))
 			continue;
-		
+
 		// police2x if requested
-		
+
 		if (police2x && !isPolice2xVehicle(vehicleId))
 			continue;
-		
+
 		// accumulate
-		
+
 		policeCount++;
-		
+
 	}
-	
+
 	return policeCount;
 }
 
 char *getVehicleUnitName(int vehicleId)
 {
-	return Units[Vehicles[vehicleId].unit_id].name;
+	return Units[Vehs[vehicleId].unit_id].name;
 }
 
 int getVehicleUnitPlan(int vehicleId)
@@ -2991,7 +2991,7 @@ bool isExploredEdge(int factionId, int x, int y)
 
 bool isVehicleExploring(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	return vehicle->state & VSTATE_EXPLORE;
 
@@ -2999,7 +2999,7 @@ bool isVehicleExploring(int vehicleId)
 
 bool isVehicleCanHealAtThisLocation(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 	MAP *vehilceMapTile = getVehicleMapTile(vehicleId);
 
 	// calculate vehicle field damage healing threshold
@@ -3194,14 +3194,14 @@ std::vector<int> getStackVehicleIds(int vehicleId)
 	// get top of the stack vehicle
 
 	int topStackVehicleId = vehicleId;
-	while (Vehicles[topStackVehicleId].prev_veh_id_stack != -1)
+	while (Vehs[topStackVehicleId].prev_veh_id_stack != -1)
 	{
-		topStackVehicleId = Vehicles[topStackVehicleId].prev_veh_id_stack;
+		topStackVehicleId = Vehs[topStackVehicleId].prev_veh_id_stack;
 	}
 
 	// collect all vehicles in the stack
 
-	for (int stackedVehicleId = topStackVehicleId; stackedVehicleId != -1; stackedVehicleId = Vehicles[stackedVehicleId].next_veh_id_stack)
+	for (int stackedVehicleId = topStackVehicleId; stackedVehicleId != -1; stackedVehicleId = Vehs[stackedVehicleId].next_veh_id_stack)
 	{
 		stackedVehicleIds.push_back(stackedVehicleId);
 	}
@@ -3213,7 +3213,7 @@ std::vector<int> getStackVehicleIds(int vehicleId)
 std::vector<int> getTileVehicleIds(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
 
@@ -3232,7 +3232,7 @@ std::vector<int> getTileVehicleIds(MAP *tile)
 
 void setTerraformingAction(int id, int action)
 {
-	VEH *vehicle = &(Vehicles[id]);
+	VEH *vehicle = &(Vehs[id]);
 
 	// subtract raise/lower land cost
 
@@ -3293,7 +3293,7 @@ std::vector<int> getLoadedVehicleIds(int vehicleId)
 
 	for (int stackedVehicleId : getStackVehicleIds(vehicleId))
 	{
-		VEH *stackedVehicle = &(Vehicles[stackedVehicleId]);
+		VEH *stackedVehicle = &(Vehs[stackedVehicleId]);
 
 		// exclude self
 
@@ -3320,10 +3320,10 @@ bool is_ocean_deep(MAP* sq) {
 bool isVehicleAtLocation(int vehicleId, int x, int y)
 {
 	assert(isOnMap(x, y));
-	
-	VEH *vehicle = &(Vehicles[vehicleId]);
+
+	VEH *vehicle = &(Vehs[vehicleId]);
 	return vehicle->x == x && vehicle->y == y;
-	
+
 }
 
 bool isVehicleAtLocation(int vehicleId, MAP *tile)
@@ -3338,7 +3338,7 @@ std::vector<int> getFactionLocationVehicleIds(int factionId, MAP *tile)
 
 	for (int vehicleId = 0; vehicleId < *VehCount; vehicleId++)
 	{
-		VEH *vehicle = &(Vehicles[vehicleId]);
+		VEH *vehicle = &(Vehs[vehicleId]);
 
 		if
 		(
@@ -3396,10 +3396,10 @@ bool isLandVehicleOnTransport(int vehicleId)
 
 int getVehicleTransportId(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
-	
+	VEH *vehicle = &(Vehs[vehicleId]);
+
 	int transportId = -1;
-	
+
 	if
 	(
 		// in transport flag is set
@@ -3416,25 +3416,25 @@ int getVehicleTransportId(int vehicleId)
 	)
 	{
 		transportId = vehicle->waypoint_x[0];
-		
+
 		// check transport is actually a transport
-		
+
 		if (!isTransportVehicle(transportId))
 		{
 			unboard(vehicleId);
 			transportId = -1;
 		}
-		
+
 	}
-	
+
 	return transportId;
-	
+
 }
 
 int setMoveTo(int vehicleId, MAP *destination)
 {
 	assert(isOnMap(destination));
-	
+
     VEH *vehicle = getVehicle(vehicleId);
 	int factionId = vehicle->faction_id;
     MAP *vehicleTile = getVehicleMapTile(vehicleId);
@@ -3443,39 +3443,39 @@ int setMoveTo(int vehicleId, MAP *destination)
 	int y = getY(destination);
 	bool vehicleTileOcean = is_ocean(vehicleTile);
 	bool destinationOcean = is_ocean(destination);
-	
+
     debug("setMoveTo %s -> %s\n", getLocationString({vehicle->x, vehicle->y}).c_str(), getLocationString(destination).c_str());
-	
+
     vehicle->waypoint_x[0] = x;
     vehicle->waypoint_y[0] = y;
     vehicle->order = ORDER_MOVE_TO;
     vehicle->status_icon = 'G';
     vehicle->movement_turns = 0;
-	
+
     // vanilla bug fix for adjacent tile move
-	
+
     int vehicleTileRangeToDestination = getRange(vehicleTile, destination);
-    
+
     int destinationVehicleFactionId = veh_who(x, y);
     bool destinationBlocked = destinationVehicleFactionId == -1 ? false : !isFriendly(factionId, destinationVehicleFactionId);
-	
+
     if (vehicle->triad() == TRIAD_LAND && !vehicleTileOcean && !destinationOcean && vehicleTileRangeToDestination == 1 && !destinationBlocked)
 	{
 		int directMoveHexCost = mod_hex_cost(vehicle->unit_id, vehicle->faction_id, vehicle->x, vehicle->y, x, y, vehicleSpeed1);
 		bool destinationZoc = isZoc(factionId, vehicleTile, destination);
-		
+
 		// set direct move to infinite cost if zoc
-		
+
 		if (destinationZoc)
 		{
 			directMoveHexCost = INT_MAX;
 		}
-		
+
 		// search optimal waypoint
-		
+
 		MAP *waypoint = nullptr;
 		int waypointMoveHexCost = directMoveHexCost;
-		
+
 		for (MAP *adjacentTile : getAdjacentTiles(vehicleTile))
 		{
 			bool adjacentTileOcean = is_ocean(adjacentTile);
@@ -3484,44 +3484,44 @@ int setMoveTo(int vehicleId, MAP *destination)
 			int adjacentTileY = getY(adjacentTile);
 			bool adjacentTileBlocked = isBlocked(factionId, adjacentTile);
 			bool adjacentTileZoc = isZoc(factionId, vehicleTile, adjacentTile);
-			
+
 			// land
-			
+
 			if (adjacentTileOcean)
 				continue;
-			
+
 			// adjacent tile should be also adjacent to destination
-			
+
 			if (adjacentTileRangeToDestination != 1)
 				continue;
-			
+
 			// not blocked
-			
+
 			if (adjacentTileBlocked)
 				continue;
-			
+
 			// not zoc
-			
+
 			if (adjacentTileZoc)
 				continue;
-			
+
 			// compute cost
-			
+
 			int hexCost1 = mod_hex_cost(vehicle->unit_id, vehicle->faction_id, vehicle->x, vehicle->y, adjacentTileX, adjacentTileY, vehicleSpeed1);
 			int hexCost2 = mod_hex_cost(vehicle->unit_id, vehicle->faction_id, adjacentTileX, adjacentTileY, x, y, vehicleSpeed1);
 			int hexCost = hexCost1 + hexCost2;
-			
+
 			if (hexCost >= directMoveHexCost)
 				continue;
-			
+
 			if (hexCost < waypointMoveHexCost)
 			{
 				waypoint = adjacentTile;
 				waypointMoveHexCost = hexCost;
 			}
-			
+
 		}
-		
+
 		if (waypoint != nullptr)
 		{
 			vehicle->waypoint_x[0] = getX(waypoint);
@@ -3531,16 +3531,16 @@ int setMoveTo(int vehicleId, MAP *destination)
 			vehicle->waypoint_count = 1;
 			debug("setWaypoint %s\n", getLocationString(waypoint).c_str());
 		}
-		
+
 	}
-	
+
     return EM_SYNC;
-	
+
 }
 
 int setMoveTo(int vehicleId, const std::vector<MAP *> &waypoints)
 {
-    VEH* vehicle = &(Vehicles[vehicleId]);
+    VEH* vehicle = &(Vehs[vehicleId]);
 
     debug("setMoveTo %s -> waypoints\n", getLocationString({vehicle->x, vehicle->y}).c_str());
 
@@ -3592,7 +3592,7 @@ bool isUnitHasAbility(int unitId, int ability)
 
 bool isVehicleHasAbility(int vehicleId, int ability)
 {
-	return isUnitHasAbility(Vehicles[vehicleId].unit_id, ability);
+	return isUnitHasAbility(Vehs[vehicleId].unit_id, ability);
 }
 
 bool isScoutUnit(int unitId)
@@ -3605,7 +3605,7 @@ bool isScoutUnit(int unitId)
 
 bool isScoutVehicle(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 	UNIT *unit = &(Units[vehicle->unit_id]);
 
 	return unit->weapon_id == WPN_HAND_WEAPONS && unit->armor_id == ARM_NO_ARMOR;
@@ -3619,7 +3619,7 @@ bool isPodPoppingUnit(int unitId)
 
 bool isPodPoppingVehicle(int vehicleId)
 {
-	return isPodPoppingUnit(Vehicles[vehicleId].unit_id);
+	return isPodPoppingUnit(Vehs[vehicleId].unit_id);
 }
 
 /*
@@ -3628,13 +3628,13 @@ Checks if location is targetted by any vehicle.
 bool isTargettedLocation(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
 
 	for (int vehicleId = 0; vehicleId < *VehCount; vehicleId++)
 	{
-		VEH *vehicle = &(Vehicles[vehicleId]);
+		VEH *vehicle = &(Vehs[vehicleId]);
 
 		if (vehicle->order == ORDER_MOVE_TO && vehicle->x == x && vehicle->y == y)
 			return true;
@@ -3651,13 +3651,13 @@ Checks if location is targetted by faction vehicle.
 bool isFactionTargettedLocation(MAP *tile, int factionId)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
 
 	for (int vehicleId = 0; vehicleId < *VehCount; vehicleId++)
 	{
-		VEH *vehicle = &(Vehicles[vehicleId]);
+		VEH *vehicle = &(Vehs[vehicleId]);
 
 		// only given faction
 
@@ -3868,105 +3868,105 @@ double getBaseIntrinsicPsiDefenseMultiplier()
 bool isWithinFriendlySensorRange(int factionId, MAP *tile)
 {
 	Profiling::start("- isWithinFriendlySensorRange");
-	
+
 	// real sensors
-	
+
 	for (MAP *rangeTile : getRangeTiles(tile, 2, true))
 	{
 		// own or neutral territory
-		
+
 		if (!(rangeTile->owner == -1 || rangeTile->owner == factionId))
 			continue;
-		
+
 		if (map_has_item(rangeTile, BIT_SENSOR))
 		{
 			Profiling::stop("- isWithinFriendlySensorRange");
 			return true;
 		}
-		
+
 	}
-	
+
 	// find bases with survey pod
-	
+
 	for (int baseId = 0; baseId < *BaseCount; baseId++)
 	{
 		BASE *base = &(Bases[baseId]);
 		MAP *baseTile = getBaseMapTile(baseId);
-		
+
 		if (base->faction_id != factionId)
 			continue;
-		
+
 		if (getRange(baseTile, tile) > 2)
 			continue;
-		
+
 		if (isBaseHasFacility(baseId, FAC_GEOSYNC_SURVEY_POD))
 		{
 			Profiling::stop("- isWithinFriendlySensorRange");
 			return true;
 		}
-		
+
 	}
-	
+
 	// not found
-	
+
 	Profiling::stop("- isWithinFriendlySensorRange");
 	return false;
-	
+
 }
 
 bool isOffenseSensorBonusApplicable(int factionId, MAP *tile)
 {
 	// offense bonus applies to the surface
-	
+
 	if (!conf.sensor_offense)
 		return false;
-	
+
 	if (tile->is_sea() && !conf.sensor_offense_ocean)
 		return false;
-	
+
 	return isWithinFriendlySensorRange(factionId, tile);
-	
+
 }
 bool isDefenseSensorBonusApplicable(int factionId, MAP *tile)
 {
 	// defense bonus applies to the surface
-	
+
 	if (tile->is_sea() && !conf.sensor_defense_ocean)
 		return false;
-	
+
 	return isWithinFriendlySensorRange(factionId, tile);
-	
+
 }
 
 int getRegionPodCount(int x, int y, int range, int region)
 {
 	assert(isOnMap(x, y));
-	
+
 	int regionPodCount = 0;
-	
+
 	for (MAP *tile = *MapTiles; tile < *MapTiles + *MapAreaTiles; tile++)
 	{
 		// within range
-		
+
 		if (map_range(x, y, getX(tile), getY(tile)) > range)
 			continue;
-		
+
 		// within region if given
-		
+
 		if (region >= 0 && tile->region != region)
 			continue;
-		
+
 		// count pods
-		
+
 		if (mod_goody_at(getX(tile), getY(tile)) != 0)
 		{
 			regionPodCount++;
 		}
-		
+
 	}
-	
+
 	return regionPodCount;
-	
+
 }
 
 MAP *getNearbyItemLocation(int x, int y, int range, int item)
@@ -4005,9 +4005,9 @@ bool isMapRangeHasItem(int x, int y, int range, uint32_t item)
 		if (map_has_item(tile, item))
 			return true;
 	}
-	
+
 	return false;
-	
+
 }
 
 /*
@@ -4015,7 +4015,7 @@ Return true if vehicle order == ORDER_SENTRY_BOARD and damage > 0.
 */
 bool isVehicleHealing(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 	return vehicle->order == ORDER_SENTRY_BOARD && vehicle->damage_taken > 0;
 }
 
@@ -4025,7 +4025,7 @@ Air units are assumed to be in all regions at once.
 */
 bool isVehicleInRegion(int vehicleId, int region)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 	MAP *vehicleTile = getVehicleMapTile(vehicleId);
 	int triad = vehicle->triad();
 
@@ -4077,7 +4077,7 @@ bool isProbeUnit(int unitId)
 
 bool isProbeVehicle(int vehicleId)
 {
-	return isProbeUnit(Vehicles[vehicleId].unit_id);
+	return isProbeUnit(Vehs[vehicleId].unit_id);
 }
 
 /*
@@ -4085,8 +4085,8 @@ Computes relative attacker/defender strength.
 */
 double battleCompute(int attackerVehicleId, int defenderVehicleId, bool longRangeCombat)
 {
-	VEH *attackerVehicle = &(Vehicles[attackerVehicleId]);
-	VEH *defenderVehicle = &(Vehicles[defenderVehicleId]);
+	VEH *attackerVehicle = &(Vehs[attackerVehicleId]);
+	VEH *defenderVehicle = &(Vehs[defenderVehicleId]);
 	MAP *defenderVehicleTile = getVehicleMapTile(defenderVehicleId);
 
 	// set flags
@@ -4188,7 +4188,7 @@ VehWeapon getFactionBestWeapon(int factionId)
 {
 	int bestWeapon = WPN_HAND_WEAPONS;
 	int bestWeaponOffenseValue = 1;
-	
+
 	for (int weaponId = WPN_LASER; weaponId <= WPN_STRING_DISRUPTOR; weaponId++)
 	{
 		if (isFactionHasTech(factionId, Weapon[weaponId].preq_tech))
@@ -4198,13 +4198,13 @@ VehWeapon getFactionBestWeapon(int factionId)
 				bestWeapon = weaponId;
 				bestWeaponOffenseValue = Weapon[weaponId].offense_value;
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	return (VehWeapon)bestWeapon;
-	
+
 }
 
 /*
@@ -4214,33 +4214,33 @@ VehWeapon getFactionBestWeapon(int factionId, int limit)
 {
 	int bestWeapon = WPN_HAND_WEAPONS;
 	int bestWeaponOffenseValue = 1;
-	
+
 	for (int weaponId = WPN_LASER; weaponId <= WPN_STRING_DISRUPTOR; weaponId++)
 	{
 		if (isFactionHasTech(factionId, Weapon[weaponId].preq_tech))
 		{
 			if (Weapon[weaponId].offense_value > limit)
 				continue;
-			
+
 			if (Weapon[weaponId].offense_value > bestWeaponOffenseValue)
 			{
 				bestWeapon = weaponId;
 				bestWeaponOffenseValue = Weapon[weaponId].offense_value;
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	return (VehWeapon)bestWeapon;
-	
+
 }
 
 VehArmor getFactionBestArmor(int factionId)
 {
 	int bestArmor = ARM_NO_ARMOR;
 	int bestArmorDefenseValue = 1;
-	
+
 	for (int armorId = ARM_SYNTHMETAL_ARMOR; armorId <= ARM_RESONANCE_8_ARMOR; armorId++)
 	{
 		if (isFactionHasTech(factionId, Armor[armorId].preq_tech))
@@ -4250,13 +4250,13 @@ VehArmor getFactionBestArmor(int factionId)
 				bestArmor = armorId;
 				bestArmorDefenseValue = Armor[armorId].defense_value;
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	return (VehArmor)bestArmor;
-	
+
 }
 
 /*
@@ -4266,26 +4266,26 @@ VehArmor getFactionBestArmor(int factionId, int limit)
 {
 	int bestArmor = ARM_NO_ARMOR;
 	int bestArmorDefenseValue = 1;
-	
+
 	for (int armorId = ARM_SYNTHMETAL_ARMOR; armorId <= ARM_RESONANCE_8_ARMOR; armorId++)
 	{
 		if (isFactionHasTech(factionId, Armor[armorId].preq_tech))
 		{
 			if (Armor[armorId].defense_value > limit)
 				continue;
-			
+
 			if (Armor[armorId].defense_value > bestArmorDefenseValue)
 			{
 				bestArmor = armorId;
 				bestArmorDefenseValue = Armor[armorId].defense_value;
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	return (VehArmor)bestArmor;
-	
+
 }
 
 /*
@@ -4334,10 +4334,10 @@ Checks if building mine at this location grants +1 mineral bonus.
 bool isMineBonus(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
-	
+
 	return
 	(
 		bonus_at(x, y) == RES_MINERAL
@@ -4351,7 +4351,7 @@ bool isMineBonus(MAP *tile)
 		map_has_landmark(tile, LM_CANYON)
 	)
 	;
-	
+
 }
 
 std::vector<int> selectVehicles(const VehicleFilter filter)
@@ -4360,7 +4360,7 @@ std::vector<int> selectVehicles(const VehicleFilter filter)
 
 	for (int vehicleId = 0; vehicleId < *VehCount; vehicleId++)
 	{
-		VEH *vehicle = &(Vehicles[vehicleId]);
+		VEH *vehicle = &(Vehs[vehicleId]);
 
 		if (filter.factionId >= 0 && vehicle->faction_id != filter.factionId)
 			continue;
@@ -4398,7 +4398,7 @@ int getSeaTransportInStack(int vehicleId)
 {
 	for (int stackedVehicleId : getStackVehicleIds(vehicleId))
 	{
-		VEH *stackedVehicle = &(Vehicles[stackedVehicleId]);
+		VEH *stackedVehicle = &(Vehs[stackedVehicleId]);
 
 		if (stackedVehicle->weapon_type() == WPN_TROOP_TRANSPORT)
 			return stackedVehicleId;
@@ -4420,7 +4420,7 @@ Checks if there is sea transport in tile.
 bool isSeaTransportAt(MAP *tile, int factionId)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
 
@@ -4459,7 +4459,7 @@ Checks if there is available sea transport in tile.
 bool isAvailableSeaTransportAt(MAP *tile, int factionId)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
 
@@ -4500,7 +4500,7 @@ bool isAvailableSeaTransportAt(MAP *tile, int factionId)
 int countPodsInBaseRadius(int x, int y)
 {
 	assert(isOnMap(x, y));
-	
+
 	int podCount = 0;
 
 	for (MAP *tile : getBaseRadiusTiles(x, y, true))
@@ -4518,80 +4518,80 @@ int countPodsInBaseRadius(int x, int y)
 bool isBlocked(int factionId, MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	// search for unfriendly unit in given tile
-	
+
 	int tileOwner = veh_who(getX(tile), getY(tile));
-	
+
 	if (tileOwner != -1 && tileOwner != factionId && !has_pact(factionId, tileOwner))
 		return true;
-	
+
 	return false;
-	
+
 }
 
 bool isZoc(int factionId, MAP *fromTile, MAP *toTile)
 {
 	assert(isOnMap(fromTile));
 	assert(isOnMap(toTile));
-	
+
 	// no ZOC on ocean
-	
+
 	if (is_ocean(fromTile) || is_ocean(toTile))
 		return false;
-	
+
 	// friendly unit allows entry
-	
+
 	int toTileOwner = veh_who(getX(toTile), getY(toTile));
 	if (toTileOwner != -1 && isFriendly(factionId, toTileOwner))
 		return false;
-	
+
 	// no ZOC on base
-	
+
 	if (isBaseAt(fromTile) || isBaseAt(toTile))
 		return false;
-	
+
 	// search for unfriendly unit in adjacent tiles
-	
+
 	bool fromZoc = false;
 	bool toZoc = false;
-	
+
 	for (MAP *adjacentTile : getAdjacentTiles(fromTile))
 	{
 		// vehicle on ocean does not excert ZOC
-		
+
 		if (is_ocean(adjacentTile))
 			continue;
-		
+
 		int adjacentTileOwner = veh_who(getX(adjacentTile), getY(adjacentTile));
-		
+
 		if (adjacentTileOwner != -1 && adjacentTileOwner != factionId && !has_pact(factionId, adjacentTileOwner))
 		{
 			fromZoc = true;
 			break;
 		}
-		
+
 	}
-	
+
 	for (MAP *adjacentTile : getAdjacentTiles(toTile))
 	{
 		// vehicle on ocean does not excert ZOC
-		
+
 		if (is_ocean(adjacentTile))
 			continue;
-		
+
 		int adjacentTileOwner = veh_who(getX(adjacentTile), getY(adjacentTile));
-		
+
 		if (adjacentTileOwner != -1 && adjacentTileOwner != factionId && !has_pact(factionId, adjacentTileOwner))
 		{
 			toZoc = true;
 			break;
 		}
-		
+
 	}
-	
+
 	return fromZoc && toZoc;
-	
+
 }
 
 /*
@@ -4599,8 +4599,8 @@ Calculates relative attacker odds (= relative strength * relative power) taking 
 */
 double getBattleOdds(int attackerVehicleId, int defenderVehicleId, int longRangeCombat)
 {
-	VEH *attackerVehicle = &(Vehicles[attackerVehicleId]);
-	VEH *defenderVehicle = &(Vehicles[defenderVehicleId]);
+	VEH *attackerVehicle = &(Vehs[attackerVehicleId]);
+	VEH *defenderVehicle = &(Vehs[defenderVehicleId]);
 
 	// calculate relative strength
 
@@ -4628,8 +4628,8 @@ double getBattleOdds(int attackerVehicleId, int defenderVehicleId, int longRange
 double getBattleOddsAt(int attackerVehicleId, int defenderVehicleId, bool longRangeCombat, MAP *battleTile)
 {
 	assert(isOnMap(battleTile));
-	
-	VEH *defenderVehicle = &(Vehicles[defenderVehicleId]);
+
+	VEH *defenderVehicle = &(Vehs[defenderVehicleId]);
 	int battleTileX = getX(battleTile);
 	int battleTileY = getY(battleTile);
 
@@ -4681,8 +4681,8 @@ Calculates average attack effect.
 */
 double getAttackEffect(int attackerVehicleId, int defenderVehicleId, bool longRangeCombat)
 {
-	VEH *attackerVehicle = &(Vehicles[attackerVehicleId]);
-	VEH *defenderVehicle = &(Vehicles[defenderVehicleId]);
+	VEH *attackerVehicle = &(Vehs[attackerVehicleId]);
+	VEH *defenderVehicle = &(Vehs[defenderVehicleId]);
 
 	// calculate relative strength
 
@@ -4736,7 +4736,7 @@ double getStackAttackEffect(int attackerVehicleId, std::vector<int> defenderVehi
 
 	for (int defenderVehicleId : defenderVehicleIds)
 	{
-		VEH *defenderVehicle = &(Vehicles[defenderVehicleId]);
+		VEH *defenderVehicle = &(Vehs[defenderVehicleId]);
 
 		// get attack effect
 
@@ -4815,12 +4815,12 @@ int getUnitDefenseValue(int unitId)
 
 int getVehicleOffenseValue(int vehicleId)
 {
-	return getUnitOffenseValue(Vehicles[vehicleId].unit_id);
+	return getUnitOffenseValue(Vehs[vehicleId].unit_id);
 }
 
 int getVehicleDefenseValue(int vehicleId)
 {
-	return getUnitDefenseValue(Vehicles[vehicleId].unit_id);
+	return getUnitDefenseValue(Vehs[vehicleId].unit_id);
 }
 
 bool isFactionSpecial(int factionId, int special)
@@ -4890,38 +4890,38 @@ MAP *getNearestLandTerritory(int x, int y, int factionId)
 {
 	MAP *nearestTerritory = nullptr;
 	int minRange = INT_MAX;
-	
+
 	for (MAP *tile = *MapTiles; tile < *MapTiles + *MapAreaTiles; tile++)
 	{
 		int mapX = getX(tile);
 		int mapY = getY(tile);
-		
+
 		// land
-		
+
 		if (is_ocean(tile))
 			continue;
-		
+
 		// faction owned
-		
+
 		if (tile->owner != factionId)
 			continue;
-		
+
 		// get range
-		
+
 		int range = map_range(x, y, mapX, mapY);
-		
+
 		// update best spot
-		
+
 		if (range < minRange)
 		{
 			nearestTerritory = tile;
 			minRange = range;
 		}
-		
+
 	}
-	
+
 	return nearestTerritory;
-	
+
 }
 
 /*
@@ -4947,42 +4947,42 @@ Boards vehicle a transport.
 void board(int vehicleId, int transportVehicleId)
 {
 	VEH *vehicle = getVehicle(vehicleId);
-	
+
 	MAP *vehicleTile = getVehicleMapTile(vehicleId);
 	MAP *transportVehicleTile = getVehicleMapTile(transportVehicleId);
-	
+
 	// check if vehicle is boarded to this transport already
-	
+
 	if (isVehicleOnTransport(vehicleId, transportVehicleId))
 		return;
-	
+
 	// vehicle should be land vehicle
-	
+
 	if (vehicle->triad() != TRIAD_LAND)
 		return;
-	
+
 	// transport should be transport
-	
+
 	if (!isTransportVehicle(transportVehicleId))
 		return;
-	
+
 	// vehicle and transport should be at the same tile
-	
+
 	if (vehicleTile != transportVehicleTile)
 		return;
-	
+
 	// transport should have capacity
-	
+
 	if (!isTransportHasCapacity(transportVehicleId))
 		return;
-	
+
 	// board vehicle on transport
-	
+
 	setVehicleOrder(vehicleId, ORDER_SENTRY_BOARD);
 	vehicle->waypoint_y[0] = 0;
 	vehicle->waypoint_x[0] = transportVehicleId;
 	vehicle->state |= VSTATE_IN_TRANSPORT;
-	
+
 }
 
 void board(int vehicleId)
@@ -5033,7 +5033,7 @@ void board(int vehicleId)
 
 void unboard(int vehicleId)
 {
-	VEH* vehicle = &(Vehicles[vehicleId]);
+	VEH* vehicle = &(Vehs[vehicleId]);
 
 	setVehicleOrder(vehicleId, ORDER_NONE);
 	vehicle->waypoint_y[0] = 0;
@@ -5051,30 +5051,30 @@ int getTransportCapacity(int transportVehicleId)
 int getTransportUsedCapacity(int transportVehicleId)
 {
 	assert(transportVehicleId >= 0 && transportVehicleId < *VehCount);
-	
+
 	int transportUsedCapacity = 0;
-	
+
 	// iterate vehicles
-	
+
 	for (int vehicleId = 0; vehicleId < *VehCount; vehicleId++)
 	{
 		// get transportId
-		
+
 		int transportId = getVehicleTransportId(vehicleId);
-		
+
 		// assigned to this transport
-		
+
 		if (transportId != transportVehicleId)
 			continue;
-		
+
 		// increment used capacity
-		
+
 		transportUsedCapacity++;
-		
+
 	}
-	
+
 	return transportUsedCapacity;
-	
+
 }
 
 int getTransportRemainingCapacity(int transportVehicleId)
@@ -5093,7 +5093,7 @@ Returns vehicle max power.
 */
 int getVehicleMaxPower(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	return 10 * vehicle->reactor_type();
 
@@ -5104,7 +5104,7 @@ Returns vehicle current power.
 */
 int getVehiclePower(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	return 10 * vehicle->reactor_type() - vehicle->damage_taken;
 
@@ -5112,7 +5112,7 @@ int getVehiclePower(int vehicleId)
 
 double getVehicleRelativeDamage(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	return (double)vehicle->damage_taken / (double)(10 * vehicle->reactor_type());
 
@@ -5125,7 +5125,7 @@ double getVehicleRelativePower(int vehicleId)
 
 int getVehicleHitPoints(int vehicleId, bool psiCombat)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	int power = getVehiclePower(vehicleId);
 
@@ -5167,9 +5167,9 @@ bool isCommlink(int factionId1, int factionId2)
 {
 	assert(factionId1 >= 0 && factionId1 < MaxPlayerNum);
 	assert(factionId2 >= 0 && factionId2 < MaxPlayerNum);
-	
+
 	return factionId1 != factionId2 && factionId1 != 0 && factionId2 != 0 && (getFaction(factionId1)->diplo_status[factionId2] & DIPLO_COMMLINK);
-	
+
 }
 
 /**
@@ -5180,9 +5180,9 @@ bool isVendetta(int factionId1, int factionId2)
 {
 	assert(factionId1 >= 0 && factionId1 < MaxPlayerNum);
 	assert(factionId2 >= 0 && factionId2 < MaxPlayerNum);
-	
+
 	return factionId1 != factionId2 && (factionId1 == 0 || factionId2 == 0 || at_war(factionId1, factionId2));
-	
+
 }
 
 /**
@@ -5192,9 +5192,9 @@ bool isPact(int factionId1, int factionId2)
 {
 	assert(factionId1 >= 0 && factionId1 < MaxPlayerNum);
 	assert(factionId2 >= 0 && factionId2 < MaxPlayerNum);
-	
+
 	return factionId1 != factionId2 && factionId1 != 0 && factionId2 != 0 && has_pact(factionId1, factionId2);
-	
+
 }
 
 /**
@@ -5204,9 +5204,9 @@ bool isTreaty(int factionId1, int factionId2)
 {
 	assert(factionId1 >= 0 && factionId1 < MaxPlayerNum);
 	assert(factionId2 >= 0 && factionId2 < MaxPlayerNum);
-	
+
 	return factionId1 != factionId2 && factionId1 != 0 && factionId2 != 0 && (getFaction(factionId1)->diplo_status[factionId2] & DIPLO_TREATY);
-	
+
 }
 
 /**
@@ -5217,9 +5217,9 @@ bool isFriendly(int factionId1, int factionId2)
 {
 	assert(factionId1 >= 0 && factionId1 < MaxPlayerNum);
 	assert(factionId2 >= 0 && factionId2 < MaxPlayerNum);
-	
+
 	return factionId1 == factionId2 || isPact(factionId1, factionId2);
-	
+
 }
 
 /**
@@ -5252,7 +5252,7 @@ Returns vehicle max hit points in psi combat.
 */
 int getVehicleMaxPsiHP(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	int opponentFirePower = vehicle->reactor_type();
 	return (10 * vehicle->reactor_type()) / opponentFirePower;
@@ -5264,7 +5264,7 @@ Returns vehicle current hit points in psi combat.
 */
 int getVehicleCurrentPsiHP(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	int opponentFirePower = vehicle->reactor_type();
 	return (10 * vehicle->reactor_type() - vehicle->damage_taken / (opponentFirePower + 1)) / opponentFirePower;
@@ -5276,7 +5276,7 @@ Returns vehicle max hit points in conventional combat.
 */
 int getVehicleMaxConHP(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	int opponentFirePower = (conf.ignore_reactor_power ? vehicle->reactor_type() : 1);
 	return (10 * vehicle->reactor_type()) / opponentFirePower;
@@ -5288,7 +5288,7 @@ Returns vehicle current hit points in conventional combat.
 */
 int getVehicleCurrentConHP(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	int opponentFirePower = (conf.ignore_reactor_power ? vehicle->reactor_type() : 1);
 	return (10 * vehicle->reactor_type() - vehicle->damage_taken / (opponentFirePower + 1)) / opponentFirePower;
@@ -5351,15 +5351,15 @@ Retrieves number of drones currently suppressed by police.
 int getBasePoliceSuppressedDrones(int baseId)
 {
 	// compute base
-	
+
 	Profiling::start("- getBasePoliceSuppressedDrones - computeBase");
 	computeBase(baseId, false);
 	Profiling::stop("- getBasePoliceSuppressedDrones - computeBase");
-	
+
 	// get drones currently suppressed by police
-	
+
 	return *CURRENT_BASE_DRONES_FACILITIES - *CURRENT_BASE_DRONES_POLICE;
-	
+
 }
 
 /*
@@ -5388,7 +5388,7 @@ bool isPolice2xUnit(int unitId, int factionId)
 
 bool isPolice2xVehicle(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 	return isPolice2xUnit(vehicle->unit_id, vehicle->faction_id);
 }
 
@@ -5399,7 +5399,7 @@ bool isInfantryPolice2xUnit(int unitId, int factionId)
 
 bool isInfantryPolice2xVehicle(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 	return isInfantryPolice2xUnit(vehicle->unit_id, vehicle->faction_id);
 }
 
@@ -5440,7 +5440,7 @@ double getFactionTechPerTurn(int factionId)
 
 bool isVehicleOnSentry(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	return vehicle->order == ORDER_SENTRY_BOARD && vehicle->waypoint_x[0] == -1 && vehicle->waypoint_y[0] == 0;
 
@@ -5448,7 +5448,7 @@ bool isVehicleOnSentry(int vehicleId)
 
 bool isVehicleOnAlert(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	return vehicle->order == ORDER_HOLD && vehicle->waypoint_x[0] == -1 && vehicle->waypoint_y[0] == 0 && vehicle->waypoint_x[1] == vehicle->x && vehicle->waypoint_y[1] == vehicle->y;
 
@@ -5456,7 +5456,7 @@ bool isVehicleOnAlert(int vehicleId)
 
 bool isVehicleOnHold(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	return vehicle->order == ORDER_HOLD && vehicle->waypoint_x[0] == -1 && vehicle->waypoint_y[0] == 0 && vehicle->waypoint_x[1] == -1 && vehicle->waypoint_y[1] == -1;
 
@@ -5464,7 +5464,7 @@ bool isVehicleOnHold(int vehicleId)
 
 bool isVehicleOnHold10Turns(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	return vehicle->order == ORDER_HOLD && vehicle->waypoint_x[0] == -1 && vehicle->waypoint_y[0] == 10 && vehicle->waypoint_x[1] == -1 && vehicle->waypoint_y[1] == -1;
 
@@ -5472,7 +5472,7 @@ bool isVehicleOnHold10Turns(int vehicleId)
 
 void setVehicleOnSentry(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	vehicle->order = ORDER_SENTRY_BOARD;
 	vehicle->waypoint_x[0] = -1;
@@ -5482,7 +5482,7 @@ void setVehicleOnSentry(int vehicleId)
 
 void setVehicleOnAlert(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	vehicle->order = ORDER_HOLD;
 	vehicle->waypoint_x[0] = -1;
@@ -5494,7 +5494,7 @@ void setVehicleOnAlert(int vehicleId)
 
 void setVehicleOnHold(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	vehicle->order = ORDER_HOLD;
 	vehicle->waypoint_x[0] = -1;
@@ -5506,7 +5506,7 @@ void setVehicleOnHold(int vehicleId)
 
 void setVehicleOnHold10Turns(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 
 	vehicle->order = ORDER_HOLD;
 	vehicle->waypoint_x[0] = -1;
@@ -5573,7 +5573,7 @@ VEH *getVehicle(int vehicleId)
 {
 	if (vehicleId >= 0 && vehicleId < *VehCount)
 	{
-		return &(Vehicles[vehicleId]);
+		return &(Vehs[vehicleId]);
 	}
 	else
 	{
@@ -5656,7 +5656,7 @@ void longRangeFire(int vehicleId, int offsetIndex)
 void longRangeFire(int vehicleId, MAP *attackLocation)
 {
 	assert(isOnMap(attackLocation));
-	
+
 	VEH *vehicle = getVehicle(vehicleId);
 	MAP *vehicleTile = getVehicleMapTile(vehicleId);
 	int x = getX(attackLocation);
@@ -5696,7 +5696,7 @@ bool isVehicleFullRepair(int vehicleId, MAP *tile)
 RepairInfo getVehicleRepairInfo(int vehicleId, MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	VEH *vehicle = getVehicle(vehicleId);
 	int triad = vehicle->triad();
 	bool native = isNativeVehicle(vehicleId);
@@ -6099,7 +6099,7 @@ bool isUnitCanAttackLowAir(int unitId)
 int getClosestHostileBaseRange(int factionId, MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
 
@@ -6137,7 +6137,7 @@ double getEuclidianDistance(int x1, int y1, int x2, int y2)
 {
 	assert(isOnMap(x1, y1));
 	assert(isOnMap(x2, y2));
-	
+
 	int dx = x2 - x1;
 	int dy = y2 - y1;
 
@@ -6175,7 +6175,7 @@ bool isAllowedMove(int vehicleId, MAP *srcTile, MAP *dstTile)
 {
 	assert(isOnMap(srcTile));
 	assert(isOnMap(dstTile));
-	
+
 	VEH *vehicle = getVehicle(vehicleId);
 	UNIT *unit = getUnit(vehicle->unit_id);
 	int triad = unit->triad();
@@ -6293,18 +6293,18 @@ bool isAllowedMove(int vehicleId, MAP *srcTile, MAP *dstTile)
 bool isZocAffectedUnit(int unitId)
 {
 	UNIT *unit = getUnit(unitId);
-	
+
 	if (unit->triad() != TRIAD_LAND)
 		return false;
-	
+
 	if (unit->plan == PLAN_PROBE || unit->plan == PLAN_ARTIFACT)
 		return false;
-	
+
 	if (unit_has_ability(unitId, ABL_CLOAKED))
 		return false;
-	
+
 	return true;
-	
+
 }
 
 bool isZocAffectedVehicle(int vehicleId)
@@ -6385,7 +6385,7 @@ bool isBunkerAt(MAP *tile)
 bool isVehicleAt(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
 
@@ -6396,7 +6396,7 @@ bool isVehicleAt(MAP *tile)
 bool isHostileVehicleAt(MAP *tile, int factionId)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
 
@@ -6412,7 +6412,7 @@ bool isHostileVehicleAt(MAP *tile, int factionId)
 bool isUnfriendlyVehicleAt(MAP *tile, int factionId)
 {
 	assert(isOnMap(tile));
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
 
@@ -6428,7 +6428,7 @@ bool isUnfriendlyVehicleAt(MAP *tile, int factionId)
 bool isHostileSurfaceVehicleAt(MAP *tile, int factionId)
 {
 	assert(isOnMap(tile));
-	
+
 	bool airbase = isAirbaseAt(tile);
 
 	for (int tileVehicleId : getTileVehicleIds(tile))
@@ -6488,7 +6488,7 @@ bool isArtilleryAt(MAP *tile)
 std::vector<int> getTileSurfaceVehicleIds(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	std::vector<int> surfaceVehicleIds;
 
 	for (int tileVehicleId : getTileVehicleIds(tile))
@@ -6608,9 +6608,9 @@ Returns base energy efficiency coefficient.
 double getBaseEnergyEfficiencyCoefficient(int baseId)
 {
 	BASE *base = getBase(baseId);
-	
+
 	return base->energy_intake <= 0 ? 1.0 : 1.0 - (double)base->energy_inefficiency / (double)base->energy_intake;
-	
+
 }
 
 /**
@@ -6620,16 +6620,16 @@ double getBaseEnergyMultiplier(int baseId)
 {
 	BASE *base = getBase(baseId);
 	Faction *faction = getFaction(base->faction_id);
-	
+
 	double economyAllocation = (double)(10 - faction->SE_alloc_labs + faction->SE_alloc_psych) / 10.0;
 	double economyMultiplier = getBaseEconomyMultiplier(baseId);
 	double labsAllocation = (double)(faction->SE_alloc_labs) / 10.0;
 	double labsMultiplier = getBaseLabsMultiplier(baseId);
-	
+
 	double energyMultiplier = economyAllocation * economyMultiplier + labsAllocation * labsMultiplier;
-	
+
 	return energyMultiplier;
-	
+
 }
 
 double getBaseEconomyMultiplier(int baseId)
@@ -6781,22 +6781,22 @@ int getRange(int x1, int y1, int x2, int y2)
 {
 	assert(isOnMap(x1, y1));
 	assert(isOnMap(x2, y2));
-	
+
 	return map_range(x1, y1, x2, y2);
-	
+
 }
 int getRange(int tile1Index, int tile2Index)
 {
 	assert(tile1Index >= 0 && tile1Index < *MapAreaTiles);
 	assert(tile2Index >= 0 && tile2Index < *MapAreaTiles);
-	
+
 	int y1 = tile1Index / (*MapHalfX);
 	int x1 = (tile1Index % (*MapHalfX)) * 2 + (y1 % 2);
 	int y2 = tile2Index / (*MapHalfX);
 	int x2 = (tile2Index % (*MapHalfX)) * 2 + (y2 % 2);
-	
+
 	return getRange(x1, y1, x2, y2);
-	
+
 }
 int getRange(MAP const *tile1, MAP const *tile2)
 {
@@ -6807,30 +6807,30 @@ int getVectorDist(int x1, int y1, int x2, int y2)
 {
 	assert(isOnMap(x1, y1));
 	assert(isOnMap(x2, y2));
-	
+
 	return vector_dist(x1, y1, x2, y2);
-	
+
 }
 int getVectorDist(int tile1Index, int tile2Index)
 {
 	assert(tile1Index >= 0 && tile1Index < *MapAreaTiles);
 	assert(tile2Index >= 0 && tile2Index < *MapAreaTiles);
-	
+
 	int y1 = tile1Index / (*MapHalfX);
 	int x1 = (tile1Index % (*MapHalfX)) * 2 + (y1 % 2);
 	int y2 = tile2Index / (*MapHalfX);
 	int x2 = (tile2Index % (*MapHalfX)) * 2 + (y2 % 2);
-	
+
 	return getVectorDist(x1, y1, x2, y2);
-	
+
 }
 int getVectorDist(MAP const *tile1, MAP const *tile2)
 {
 	assert(tile1 >= *MapTiles && tile1 < *MapTiles + *MapAreaTiles);
 	assert(tile2 >= *MapTiles && tile2 < *MapTiles + *MapAreaTiles);
-	
+
 	return getVectorDist(getX(tile1), getY(tile1), getX(tile2), getY(tile2));
-	
+
 }
 
 /*
@@ -6840,16 +6840,16 @@ int getProximity(int x1, int y1, int x2, int y2)
 {
 	assert(isOnMap(x1, y1));
 	assert(isOnMap(x2, y2));
-	
+
 	int dx = abs(x1 - x2);
 	int dy = abs(y1 - y2);
 	if (!map_is_flat() && dx > *MapHalfX)
 	{
 		dx = *MapAreaX - dx;
 	}
-	
+
     return (min(dx, dy) + 3 * max(dx, dy)) / 2;
-    
+
 }
 
 /*
@@ -6903,51 +6903,51 @@ Location getLocationByAngle(int x, int y, int angle)
 {
 	assert(isOnMap(x, y));
 	assert(angle >= 0 && angle < TABLE_next_cell_count);
-	
+
 	int nx = wrap(x + TABLE_next_cell_x[angle]);
 	int ny = y + TABLE_next_cell_y[angle];
-	
+
 	if (!isOnMap(nx, ny))
 		return Location();
-	
+
 	return Location(nx, ny);
-	
+
 }
 
 int getTileIndexByAngle(int tileIndex, int angle)
 {
 	assert(tileIndex >= 0 && tileIndex < *MapAreaTiles);
 	assert(angle >= 0 && angle < TABLE_next_cell_count);
-	
+
 	int x = getX(tileIndex);
 	int y = getY(tileIndex);
-	
+
 	int nx = wrap(x + TABLE_next_cell_x[angle]);
 	int ny = y + TABLE_next_cell_y[angle];
-	
+
 	if (!isOnMap(nx, ny))
 		return -1;
-	
+
 	return getMapTileIndex(nx, ny);
-	
+
 }
 
 MAP *getTileByAngle(MAP *tile, int angle)
 {
 	assert(isOnMap(tile));
 	assert(angle >= 0 && angle < TABLE_next_cell_count);
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
-	
+
 	int nx = wrap(x + TABLE_next_cell_x[angle]);
 	int ny = y + TABLE_next_cell_y[angle];
-	
+
 	if (!isOnMap(nx, ny))
 		return nullptr;
-	
+
 	return getMapTile(nx, ny);
-	
+
 }
 
 int getAngleByTile(MAP *tile, MAP *anotherTile)
@@ -7055,7 +7055,7 @@ Computes max relative bombardment damage vehicles can receive at this location.
 double getLocationBombardmentMaxRelativeDamage(MAP *tile)
 {
 	int maxBombardmentDamagePercentage = 100;
-	
+
 	if (isBaseAt(tile) || isBunkerAt(tile))
 	{
 		maxBombardmentDamagePercentage = Rules->max_dmg_percent_arty_base_bunker;
@@ -7068,9 +7068,9 @@ double getLocationBombardmentMaxRelativeDamage(MAP *tile)
 	{
 		maxBombardmentDamagePercentage = Rules->max_dmg_percent_arty_open;
 	}
-	
+
 	return getPercentageBonusMultiplier(-maxBombardmentDamagePercentage);
-	
+
 }
 
 double getVehicleBombardmentMaxRelativeDamage(int vehicleId)
@@ -7112,9 +7112,9 @@ double getVehicleBombardmentRemainingRelativeDamage(int vehicleId)
 {
 	double maxRelativeBombardmentDamage = getVehicleBombardmentMaxRelativeDamage(vehicleId);
 	double relativeDamage = getVehicleRelativeDamage(vehicleId);
-	
+
 	return std::max(0.0, maxRelativeBombardmentDamage - relativeDamage);
-	
+
 }
 
 int getBasePopulationLimit(int baseId)
@@ -7194,16 +7194,16 @@ Budget getBaseBudgetIntake(int baseId)
 {
 	BASE *base = getBase(baseId);
 	Faction *faction = getFaction(base->faction_id);
-	
+
 	int allocationEconomy = 10 - faction->SE_alloc_psych - faction->SE_alloc_labs;
 	int allocationPsych = faction->SE_alloc_psych;
-	
+
 	int economyIntake = (base->energy_surplus * allocationEconomy + 4) / 10;
 	int psychIntake = (base->energy_surplus * allocationPsych + 4) / 10;
 	int labsIntake = base->energy_surplus - economyIntake - psychIntake;
-	
+
 	return {economyIntake, psychIntake, labsIntake};
-	
+
 }
 
 Budget getBaseBudgetIntake2(int baseId)
@@ -7244,15 +7244,15 @@ double getBasePopulationGrowthRate(int baseId)
 int getBaseTurnsToPopulation(int baseId, int population)
 {
 	BASE *base = getBase(baseId);
-	
+
 	if (base->pop_size >= population)
 		return 0.0;
-	
+
 	int nutrientCostFactor = mod_cost_factor(base->faction_id, RSC_NUTRIENT, baseId);
 	int requiredNutrients = nutrientCostFactor * (population - base->pop_size) * (population + base->pop_size + 1) / 2;
 	int remainingNutrients = requiredNutrients - base->nutrients_accumulated;
 	return remainingNutrients / std::max(1, base->nutrient_surplus);
-	
+
 }
 
 int getMovementRateAlongTube()
@@ -7272,10 +7272,10 @@ bool isInfantryDefensiveUnit(int unitId)
 	int defenseValue = getUnitDefenseValue(unitId);
 
 	// battle ogre is considred defensive unit
-	
+
 	if (isBattleOgreUnit(unitId))
 		return true;
-	
+
 	// combat
 
 	if (!isCombatUnit(unitId))
@@ -7295,7 +7295,7 @@ bool isInfantryDefensiveUnit(int unitId)
 
 	if (offenseValue < 0)
 		return false;
-	
+
 	// conventional offense should not be more than conventional offense
 
 	return offenseValue <= defenseValue;
@@ -7303,7 +7303,7 @@ bool isInfantryDefensiveUnit(int unitId)
 }
 bool isInfantryDefensiveVehicle(int vehicleId)
 {
-	return isInfantryDefensiveUnit(Vehicles[vehicleId].unit_id);
+	return isInfantryDefensiveUnit(Vehs[vehicleId].unit_id);
 }
 
 bool isInfantryDefensivePolice2xUnit(int unitId, int factionId)
@@ -7332,7 +7332,7 @@ bool isUnitRequiresSupport(int unitId)
 
 bool isVehicleRequiresSupport(int vehicleId)
 {
-	return isUnitRequiresSupport(Vehicles[vehicleId].unit_id);
+	return isUnitRequiresSupport(Vehs[vehicleId].unit_id);
 }
 
 bool isInterceptorUnit(int unitId)
@@ -7341,7 +7341,7 @@ bool isInterceptorUnit(int unitId)
 }
 bool isInterceptorVehicle(int vehicleId)
 {
-	return isInterceptorUnit(Vehicles[vehicleId].unit_id);
+	return isInterceptorUnit(Vehs[vehicleId].unit_id);
 }
 
 int getUnitSupport(int unitId)
@@ -7351,7 +7351,7 @@ int getUnitSupport(int unitId)
 
 bool getVehicleSupport(int vehicleId)
 {
-	return isUnitRequiresSupport(Vehicles[vehicleId].unit_id);
+	return isUnitRequiresSupport(Vehs[vehicleId].unit_id);
 }
 
 bool isFactionHasAbility(int faction, VehAbl abl)
@@ -7368,7 +7368,7 @@ bool isFactionHasTech(int factionId, int tech)
 int getFactionTechCount(int factionId)
 {
 	int count = 0;
-	
+
 	for (int techId = TECH_Biogen; techId <= TECH_TranT; techId++)
 	{
 		if (isFactionHasTech(factionId, techId))
@@ -7376,42 +7376,42 @@ int getFactionTechCount(int factionId)
 			count++;
 		}
 	}
-	
+
     return count;
-    
+
 }
 
 bool isUnprotectedArtifact(int vehicleId)
 {
 	VEH *vehicle = getVehicle(vehicleId);
-	
+
 	// artifact
-	
+
 	if (vehicle->unit_id != BSC_ALIEN_ARTIFACT)
 		return false;
-	
+
 	// not at base
-	
+
 	if (map_has_item(getVehicleMapTile(vehicleId), BIT_BASE_IN_TILE))
 		return false;
-	
+
 	for (int stackVehicleId : getStackVehicleIds(vehicleId))
 	{
 		VEH *stackVehicle = getVehicle(stackVehicleId);
-		
+
 		// ignore artifact
-		
+
 		if (stackVehicle->unit_id == BSC_ALIEN_ARTIFACT)
 			continue;
-		
+
 		// stack is protected
-		
+
 		return false;
-		
+
 	}
-	
+
 	return true;
-	
+
 }
 
 /**
@@ -7430,7 +7430,7 @@ bool isBattleOgreUnit(int unitId)
 
 bool isBattleOgreVehicle(int vehicleId)
 {
-	return isBattleOgreUnit(Vehicles[vehicleId].unit_id);
+	return isBattleOgreUnit(Vehs[vehicleId].unit_id);
 }
 
 /**
@@ -7441,23 +7441,23 @@ int getUnitMoveRate(int factionId, int unitId)
 {
 	UNIT *unit = getUnit(unitId);
     int triad = unit->triad();
-    
+
 	// fungal tower does not move
-	
+
 	if (unitId == BSC_FUNGAL_TOWER)
 	{
 		return 0;
 	}
-	
+
 	int unitMoveRate = speed_proto(unitId);
 
     if (triad == TRIAD_SEA && isFactionHasProject(factionId, FAC_MARITIME_CONTROL_CENTER))
 	{
 		unitMoveRate += 2 * Rules->move_rate_roads;
 	}
-	
+
     return unitMoveRate;
-    
+
 }
 
 /**
@@ -7492,18 +7492,18 @@ int getVehicleSpeed(int vehicleId)
 bool isTileAccessesWater(MAP *tile)
 {
 	// ocean
-	
+
 	if (is_ocean(tile))
 		return true;
-	
+
 	for (MAP *adjacentTile : getAdjacentTiles(tile))
 	{
 		if (is_ocean(adjacentTile))
 			return true;
 	}
-	
+
 	return false;
-	
+
 }
 
 bool isBaseAccessesWater(int baseId)
@@ -7515,69 +7515,69 @@ bool isBaseCanBuildShip(int baseId)
 {
 	BASE *base = getBase(baseId);
 	int factionId = base->faction_id;
-	
+
 	// no tech
-	
+
 	if (!isFactionHasTech(factionId, getChassis(CHS_FOIL)->preq_tech))
 		return false;
-	
+
 	// can build if accesses water
-	
+
 	return isBaseAccessesWater(baseId);
-	
+
 }
 
 bool isUnitZocRestricted(int unitId)
 {
 	UNIT *unit = getUnit(unitId);
-	
+
 	bool zocRestricted = false;
-	
+
 	switch (unit->triad())
 	{
 	case TRIAD_LAND:
-		
+
 		// land unit is restricted by default
-		
+
 		zocRestricted = true;
-		
+
 		// artifact and probe are not restricted
-		
+
 		switch (unit->weapon_id)
 		{
 		case WPN_ALIEN_ARTIFACT:
 		case WPN_PROBE_TEAM:
-			
+
 			zocRestricted = false;
-			
+
 			break;
-			
+
 		}
-		
+
 		// cloaked is not restricted
-		
+
 		if (isUnitHasAbility(unitId, ABL_CLOAKED))
 		{
 			zocRestricted = false;
 		}
-		
+
 		break;
-		
+
 	default:
-		
+
 		// non land unit is not restricted
-		
+
 		zocRestricted = false;
-		
+
 	}
-	
+
 	return zocRestricted;
-	
+
 }
 
 bool isVehicleZocRestricted(int vehicleId)
 {
-	return isUnitZocRestricted(Vehicles[vehicleId].unit_id);
+	return isUnitZocRestricted(Vehs[vehicleId].unit_id);
 }
 
 /**
@@ -7586,18 +7586,18 @@ Gets all base regular facilities.
 std::vector<int> getBaseFacilities(int baseId)
 {
 	std::vector<int> facilities;
-	
+
 	for (int facilityId = Fac_ID_First; facilityId <= Fac_ID_Last; facilityId++)
 	{
 		if (isBaseHasFacility(baseId, facilityId))
 		{
 			facilities.push_back(facilityId);
 		}
-		
+
 	}
-	
+
 	return facilities;
-	
+
 }
 
 /**
@@ -7606,29 +7606,29 @@ Gets all base projects.
 std::vector<int> getBaseProjects(int baseId)
 {
 	std::vector<int> projects;
-	
+
 	for (int facilityId = SP_ID_First; facilityId <= SP_ID_Last; facilityId++)
 	{
 		if (isBaseHasFacility(baseId, facilityId))
 		{
 			projects.push_back(facilityId);
 		}
-		
+
 	}
-	
+
 	return projects;
-	
+
 }
 
 Resource getBaseWorkerResourceIntake(int baseId, MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	BASE *base = getBase(baseId);
 	int factionId = base->faction_id;
 	int x = getX(tile);
 	int y = getY(tile);
-	
+
 	return
 		{
 			(double)mod_crop_yield(factionId, baseId, x, y, 0) - (double)Rules->nutrient_intake_req_citizen,
@@ -7636,15 +7636,15 @@ Resource getBaseWorkerResourceIntake(int baseId, MAP *tile)
 			(double)mod_energy_yield(factionId, baseId, x, y, 0),
 		}
 	;
-	
+
 }
 
 Resource getBaseResourceIntake2(int baseId)
 {
 	BASE *base = getBase(baseId);
-	
+
 	return {(double)base->nutrient_surplus, (double)base->mineral_intake_2, (double)(base->economy_total + base->labs_total)};
-	
+
 }
 
 bool isLandRegion(MAP *tile, bool includePolar)
@@ -7666,29 +7666,29 @@ int getBaseNextUnitSupport(int baseId, int unitId)
 {
 	BASE *base = &(Bases[baseId]);
 	Faction *faction = getFaction(base->faction_id);
-	
+
 	// check if unit requires no support
-	
+
 	if (!isUnitRequiresSupport(unitId))
 		return 0;
-	
+
 	// base supported vehicles
-	
+
 	int supportRequiredVehicleCount = 0;
-	
+
 	for (int vehicleId = 0; vehicleId < *VehCount; vehicleId++)
 	{
-		if (Vehicles[vehicleId].home_base_id == baseId && isVehicleRequiresSupport(vehicleId))
+		if (Vehs[vehicleId].home_base_id == baseId && isVehicleRequiresSupport(vehicleId))
 		{
 			supportRequiredVehicleCount++;
 		}
-		
+
 	}
-	
+
 	// support
-	
+
 	int nextUnitSupport;
-	
+
 	if (conf.alternative_support)
 	{
 		switch (faction->SE_support_pending)
@@ -7720,7 +7720,7 @@ int getBaseNextUnitSupport(int baseId, int unitId)
 		default:
 			nextUnitSupport = 0;
 		}
-		
+
 	}
 	else
 	{
@@ -7751,64 +7751,64 @@ int getBaseNextUnitSupport(int baseId, int unitId)
 		default:
 			nextUnitSupport = 0;
 		}
-		
+
 	}
-	
+
 	return nextUnitSupport;
-	
+
 }
 
 int getBaseMoraleModifier(int baseId, int extendedTriad)
 {
 	BASE *base = getBase(baseId);
-	
+
 	int moraleModifier = 0;
-	
+
 	if (extendedTriad == 3)
 	{
 		if (isFactionHasProject(base->faction_id, FAC_XENOEMPATHY_DOME))
 		{
 			moraleModifier++;
 		}
-		
+
 		if (isFactionHasProject(base->faction_id, FAC_PHOLUS_MUTAGEN))
 		{
 			moraleModifier++;
 		}
-		
+
 		if (isFactionHasProject(base->faction_id, FAC_VOICE_OF_PLANET))
 		{
 			moraleModifier++;
 		}
-		
+
 		if (isBaseHasFacility(baseId, FAC_CENTAURI_PRESERVE))
 		{
 			moraleModifier++;
 		}
-		
+
 		if (isBaseHasFacility(baseId, FAC_TEMPLE_OF_PLANET))
 		{
 			moraleModifier++;
 		}
-		
+
 		if (isBaseHasFacility(baseId, FAC_BIOLOGY_LAB))
 		{
 			moraleModifier++;
 		}
-		
+
 		if (isBaseHasFacility(baseId, FAC_BIOENHANCEMENT_CENTER))
 		{
 			moraleModifier++;
 		}
-		
+
 	}
 	else
 	{
 		moraleModifier = morale_mod(baseId, base->faction_id, extendedTriad);
 	}
-	
+
 	return moraleModifier;
-	
+
 }
 
 bool isFactionCanBuildAirOffense(int factionId)
@@ -7839,9 +7839,9 @@ bool isFactionCanBuildMelee(int factionId, int type, int triad)
 {
 	if (factionId == 0)
 		return false;
-	
+
 	bool canBuild = false;
-	
+
 	switch (type)
 	{
 	case 0:
@@ -7895,9 +7895,9 @@ bool isFactionCanBuildMelee(int factionId, int type, int triad)
 		}
 		break;
 	}
-	
+
 	return canBuild;
-	
+
 }
 
 bool isRoughTerrain(MAP *tile)
@@ -7916,16 +7916,16 @@ Returns non polar sea regions base accesses.
 std::set<int> getBaseSeaRegions(int baseId)
 {
 	MAP *baseTile = getBaseMapTile(baseId);
-	
+
 	std::set<int> baseSeaRegions;
-	
+
 	if (is_ocean(baseTile))
 	{
 		if (!baseTile->is_pole_tile())
 		{
 			baseSeaRegions.insert(baseTile->region);
 		}
-		
+
 	}
 	else
 	{
@@ -7935,13 +7935,13 @@ std::set<int> getBaseSeaRegions(int baseId)
 			{
 				baseSeaRegions.insert(adjacentTile->region);
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	return baseSeaRegions;
-	
+
 }
 
 /**
@@ -7955,44 +7955,44 @@ int getClosestNotOwnedTileRange(int factionId, MAP *tile, int minRadius, int max
 	assert(tile >= *MapTiles && tile < *MapTiles + *MapAreaTiles);
 	assert(minRadius >= 0 && minRadius < TABLE_square_block_radius_count);
 	assert(maxRadius >= 0 && maxRadius < TABLE_square_block_radius_count);
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
-	
+
 	int closestNotOwnedTileRange = -1;
-	
+
 	for (int radius = minRadius; radius <= maxRadius; radius++)
 	{
 		int minIndex = (radius == 0 ? 0 : TABLE_square_block_radius[radius - 1]);
 		int maxIndex = TABLE_square_block_radius[radius];
-		
+
 		for (int index = minIndex; index < maxIndex; index++)
 		{
 			int offsetX = TABLE_square_offset_x[index];
 			int offsetY = TABLE_square_offset_y[index];
-			
+
 			int cellX = wrap(x + offsetX);
 			int cellY = y + offsetY;
-			
+
 			if (!isOnMap(cellX, cellY))
 				continue;
-			
+
 			MAP *tile = getMapTile(cellX, cellY);
 			if (tile->owner != factionId)
 			{
 				closestNotOwnedTileRange = radius;
 				break;
 			}
-			
+
 		}
-		
+
 		if (closestNotOwnedTileRange != -1)
 			break;
-		
+
 	}
-	
+
 	return closestNotOwnedTileRange;
-	
+
 }
 
 /**
@@ -8006,49 +8006,49 @@ int getClosestNotOwnedOrSeaTileRange(int factionId, MAP *tile, int minRadius, in
 	assert(tile >= *MapTiles && tile < *MapTiles + *MapAreaTiles);
 	assert(minRadius >= 0 && minRadius < TABLE_square_block_radius_count);
 	assert(maxRadius >= 0 && maxRadius < TABLE_square_block_radius_count);
-	
+
 	// land
-	
+
 	if (!tile->is_land())
 		return -1;
-	
+
 	int x = getX(tile);
 	int y = getY(tile);
-	
+
 	int closestNotOwnedOrSeaTileRange = -1;
-	
+
 	for (int radius = minRadius; radius <= maxRadius; radius++)
 	{
 		int minIndex = (radius == 0 ? 0 : TABLE_square_block_radius[radius - 1]);
 		int maxIndex = TABLE_square_block_radius[radius];
-		
+
 		for (int index = minIndex; index < maxIndex; index++)
 		{
 			int offsetX = TABLE_square_offset_x[index];
 			int offsetY = TABLE_square_offset_y[index];
-			
+
 			int cellX = wrap(x + offsetX);
 			int cellY = y + offsetY;
-			
+
 			if (!isOnMap(cellX, cellY))
 				continue;
-			
+
 			MAP *tile = getMapTile(cellX, cellY);
 			if (tile->owner != factionId || tile->is_sea())
 			{
 				closestNotOwnedOrSeaTileRange = radius;
 				break;
 			}
-			
+
 		}
-		
+
 		if (closestNotOwnedOrSeaTileRange != -1)
 			break;
-		
+
 	}
-	
+
 	return closestNotOwnedOrSeaTileRange;
-	
+
 }
 
 int getUnitOffenseExtendedTriad(int unitId, int enemyUnitId)

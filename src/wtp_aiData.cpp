@@ -27,52 +27,52 @@ void CombatStrength::accumulate(CombatStrength &combatStrength, double multiplie
 		{
 			this->values.at(attackerCOMBAT_TYPE).at(defenderCOMBAT_TYPE) += multiplier * combatStrength.values.at(attackerCOMBAT_TYPE).at(defenderCOMBAT_TYPE);
 		}
-		
+
 	}
-	
+
 }
 
 double CombatStrength::getAttackEffect(int vehicleId)
 {
 	COMBAT_TYPE defenderCombatType = getArmorType(vehicleId);
-	
+
 	double effect = 0.0;
-	
+
 	switch (defenderCombatType)
 	{
 	case CT_PSI:
-		
+
 		{
 			double psiDefenseStrength = getVehiclePsiDefenseStrength(vehicleId);
-			
+
 			effect =
 				+ this->values.at(CT_PSI).at(CT_PSI) / psiDefenseStrength
 				+ this->values.at(CT_CON).at(CT_PSI) / psiDefenseStrength
 			;
-			
+
 		}
-		
+
 		break;
-		
+
 	case CT_CON:
-		
+
 		{
 			double psiDefenseStrength = getVehiclePsiDefenseStrength(vehicleId);
 			double conDefenseStrength = getVehicleConDefenseStrength(vehicleId);
-			
+
 			effect =
 				+ this->values.at(CT_PSI).at(CT_CON) / psiDefenseStrength
 				+ this->values.at(CT_CON).at(CT_CON) / conDefenseStrength
 			;
-			
+
 		}
-		
+
 		break;
-		
+
 	}
-	
+
 	return effect;
-	
+
 }
 
 //double FoeUnitWeightTable::get(int factionId, int unitId)
@@ -174,21 +174,21 @@ bool Data::isLand(MAP *tile)
 bool Data::isSeaUnitAllowed(MAP *tile, int factionId)
 {
 	assert(isOnMap(tile));
-	
+
 	TileInfo &tileInfo = aiData.tileInfos.at(tile - *MapTiles);
-	
+
 	return tileInfo.ocean || (tileInfo.base && isFriendly(factionId, tile->owner));
-	
+
 }
 
 bool Data::isLandUnitAllowed(MAP *tile)
 {
 	assert(isOnMap(tile));
-	
+
 	TileInfo &tileInfo = aiData.tileInfos.at(tile - *MapTiles);
-	
+
 	return !tileInfo.ocean;
-	
+
 }
 
 BaseInfo &Data::getBaseInfo(int baseId)
@@ -204,9 +204,9 @@ void ProtectedLocation::addVehicle(int vehicleId)
 	VEH *vehicle = getVehicle(vehicleId);
 	MAP *vehicleTile = getVehicleMapTile(vehicleId);
 	int triad = vehicle->triad();
-	
+
 	// set stack tile
-	
+
 	if (tile == nullptr)
 	{
 		tile = vehicleTile;
@@ -215,13 +215,13 @@ void ProtectedLocation::addVehicle(int vehicleId)
 	{
 		assert(vehicleTile == tile);
 	}
-	
+
 	// add combat vehicle
-	
+
 	if (isCombatVehicle(vehicleId))
 	{
 		vehicleIds.push_back(vehicleId);
-		
+
 		if (triad == TRIAD_AIR && !airbase)
 		{
 			airVehicleIds.push_back(vehicleId);
@@ -235,9 +235,9 @@ void ProtectedLocation::addVehicle(int vehicleId)
 		{
 			nonArtilleryVehicleIds.push_back(vehicleId);
 		}
-		
+
 	}
-	
+
 }
 
 // EnemyStackInfo
@@ -247,9 +247,9 @@ void EnemyStackInfo::addVehicle(int vehicleId)
 	VEH *vehicle = getVehicle(vehicleId);
 	MAP *vehicleTile = getVehicleMapTile(vehicleId);
 	int triad = vehicle->triad();
-	
+
 	// set stack tile
-	
+
 	if (tile == nullptr)
 	{
 		tile = vehicleTile;
@@ -260,15 +260,15 @@ void EnemyStackInfo::addVehicle(int vehicleId)
 		{
 			debug("ERROR: stack vehicles are on different tiles."); exit(1);
 		}
-		
+
 	}
-	
+
 	// add combat vehicle
-	
+
 	if (!isArtifactVehicle(vehicleId) && !(isProbeVehicle(vehicleId) && getVehicleDefenseValue(vehicleId) == 1))
 	{
 		vehicleIds.push_back(vehicleId);
-		
+
 		if (triad == TRIAD_AIR && !airbase)
 		{
 			airVehicleIds.push_back(vehicleId);
@@ -285,26 +285,26 @@ void EnemyStackInfo::addVehicle(int vehicleId)
 			bombardment = true;
 			targetable = true;
 		}
-		
+
 		// add weight
-		
+
 		weight += getVehicleRelativePower(vehicleId);
-		
+
 	}
-	
+
 	// boolean flags
-	
+
 	hostile = isHostile(aiFactionId, vehicle->faction_id);
-	
+
 	if (isPact(aiFactionId, vehicle->faction_id) || isTreaty(aiFactionId, vehicle->faction_id))
 	{
 		breakTreaty = true;
 	}
-	
+
 	if (vehicle->faction_id == 0)
 	{
 		alien = true;
-		
+
 		switch (vehicle->unit_id)
 		{
 		case BSC_MIND_WORMS:
@@ -323,27 +323,27 @@ void EnemyStackInfo::addVehicle(int vehicleId)
 			alienMelee = true;
 			break;
 		}
-		
+
 	}
-	
+
 	if (isNeedlejetVehicle(vehicleId) && !isAtAirbase(vehicleId))
 	{
 		needlejetInFlight = true;
 	}
-	
+
 	if (isArtifactVehicle(vehicleId))
 	{
 		artifact = true;
 	}
-	
+
 	// vehicleSpeed
-	
+
 	int vehicleSpeed = getVehicleSpeed(vehicleId);
 	if (lowestSpeed == -1 || vehicleSpeed < lowestSpeed)
 	{
 		lowestSpeed = vehicleSpeed;
 	}
-	
+
 }
 
 bool EnemyStackInfo::isUnitCanMeleeAttackStack(int unitId, MAP *position) const
@@ -352,23 +352,23 @@ bool EnemyStackInfo::isUnitCanMeleeAttackStack(int unitId, MAP *position) const
 	int triad = unit->triad();
 	bool ocean = is_ocean(this->tile);
 	bool base = this->base;
-	
+
 	// melee unit
-	
+
 	if (!isMeleeUnit(unitId))
 		return false;
-	
+
 	// cannot attack needlejet in flight without air superiority
-	
+
 	if (this->needlejetInFlight && !isUnitHasAbility(unitId, ABL_AIR_SUPERIORITY))
 		return false;
-	
+
 	// check movement
-	
+
 	switch (triad)
 	{
 	case TRIAD_SEA:
-		
+
 		if (unitId == BSC_SEALURK)
 		{
 			// sealurk can melee attack land
@@ -376,57 +376,57 @@ bool EnemyStackInfo::isUnitCanMeleeAttackStack(int unitId, MAP *position) const
 		else
 		{
 			// sea vehicle cannot attack enemy on land (except sealurk)
-			
+
 			if (!ocean)
 				return false;
-			
+
 		}
-		
+
 		break;
-		
+
 	case TRIAD_LAND:
-		
+
 		if (isUnitHasAbility(unitId, ABL_AMPHIBIOUS))
 		{
 			// land amphibious vehicle can attack sea base but not open sea
-			
+
 			if (ocean && !base)
 				return false;
-		
+
 		}
 		else
 		{
 			// land non-amphibious vehicle cannot attack enemy on ocean
-			
+
 			if (ocean)
 				return false;
-			
+
 		}
-		
+
 		break;
-		
+
 	}
-	
+
 	// check position if given
-	
+
 	if (position != nullptr)
 	{
 		bool positionOcean = is_ocean(position);
 		bool positionBase = map_has_item(position, BIT_BASE_IN_TILE);
-		
+
 		switch (triad)
 		{
 		case TRIAD_SEA:
-			
+
 			// sea vehicle can attack from ocean or base
-			
+
 			if (!positionOcean && !positionBase)
 				return false;
-			
+
 			break;
-			
+
 		case TRIAD_LAND:
-			
+
 			if (isUnitHasAbility(unitId, ABL_AMPHIBIOUS))
 			{
 				// land amphibious vehicle can attack from sea
@@ -434,74 +434,74 @@ bool EnemyStackInfo::isUnitCanMeleeAttackStack(int unitId, MAP *position) const
 			else
 			{
 				// land non-amphibious can attack from land only
-				
+
 				if (positionOcean)
 					return false;
-				
+
 			}
-			
+
 			break;
-			
+
 		}
-		
+
 	}
-	
+
 	// all checks passed
-	
+
 	return true;
-	
+
 }
 
 bool EnemyStackInfo::isUnitCanArtilleryAttackStack(int unitId, MAP *position) const
 {
 	UNIT *unit = getUnit(unitId);
 	int triad = unit->triad();
-	
+
 	// artillery unit
-	
+
 	if (!isArtilleryUnit(unitId))
 		return false;
-	
+
 	// available attack targets
-	
+
 	if (!this->targetable)
 		return false;
-	
+
 	// check position if given
-	
+
 	if (position != nullptr)
 	{
 		bool positionOcean = is_ocean(position);
 		bool positionBase = map_has_item(position, BIT_BASE_IN_TILE);
-		
+
 		switch (triad)
 		{
 		case TRIAD_SEA:
-			
+
 			// sea artillery can fire from ocean or base
-			
+
 			if (!positionOcean && !positionBase)
 				return false;
-			
+
 			break;
-			
+
 		case TRIAD_LAND:
-			
+
 			// land artillery can fire from land or base
-			
+
 			if (positionOcean && !positionBase)
 				return false;
-			
+
 			break;
-			
+
 		}
-		
+
 	}
-	
+
 	// all checks passed
-	
+
 	return true;
-	
+
 }
 
 void EnemyStackInfo::setUnitOffenseEffect(int unitId, COMBAT_MODE combatMode, double effect)
@@ -561,9 +561,9 @@ double EnemyStackInfo::getTotalBombardmentEffect() const
 {
 	if (artillery || !bombardment || combinedBombardmentEffect == 0.0)
 		return 0.0;
-	
+
 	return std::min(maxBombardmentEffect, (double)BOMBARDMENT_ROUNDS * combinedBombardmentEffect);
-	
+
 }
 
 /**
@@ -613,12 +613,12 @@ Returns true if accepted.
 bool EnemyStackInfo::addAttacker(IdDoubleValue vehicleTravelTime)
 {
 	int vehicleId = vehicleTravelTime.id;
-	
+
 	bool accepted = false;
-	
+
 	double bombardmentEffect = getVehicleBombardmentEffect(vehicleId);
 	double directEffect = getVehicleDirectEffect(vehicleId);
-	
+
 	if (bombardmentEffect > 0.0 && !artillery && bombardment && !bombardmentSufficient)
 	{
 		combinedBombardmentEffect += bombardmentEffect;
@@ -633,9 +633,9 @@ bool EnemyStackInfo::addAttacker(IdDoubleValue vehicleTravelTime)
 		directVechileTravelTimes.push_back(vehicleTravelTime);
 		accepted = true;
 	}
-	
+
 	return accepted;
-	
+
 }
 
 /**
@@ -644,26 +644,26 @@ Computes atttack parameters after all attackers are added.
 void EnemyStackInfo::computeAttackParameters()
 {
 	debug("enemyStack computeAttackParameters %s\n", getLocationString(tile).c_str());
-	
+
 	// sort direct ascending
-	
+
 	std::sort(directVechileTravelTimes.begin(), directVechileTravelTimes.end(), compareIdDoubleValueAscending);
-	
+
 	// find a coordinator travel time
 	// the latest one to amount to the required superiority
-	
+
 	double requiredEffect = getRequiredEffect();
 	double accumulatedEffect = 0.0;
 	coordinatorTravelTime = INF;
-	
+
 	for (IdDoubleValue const &vehicleTravelTime : directVechileTravelTimes)
 	{
 		int vehicleId = vehicleTravelTime.id;
 		double travelTime = vehicleTravelTime.value;
-		
+
 		double effect = getVehicleDirectEffect(vehicleId);
 		accumulatedEffect += effect;
-		
+
 		debug
 		(
 			"\t[%4d] %s"
@@ -678,40 +678,40 @@ void EnemyStackInfo::computeAttackParameters()
 			, effect
 			, accumulatedEffect
 		);
-		
+
 		if (accumulatedEffect >= requiredEffect)
 		{
 			coordinatorTravelTime = travelTime;
 			break;
 		}
-		
+
 	}
-		
+
 	debug("\tcoordinatorTravelTime=%5.2f\n", coordinatorTravelTime)
-	
+
 	// compute additional weight
-	
+
 	if (baseId != -1)
 	{
 		BASE *base = getBase(baseId);
 		int factionId = base->faction_id;
 		FactionInfo const &factionInfo = aiData.factionInfos.at(factionId);
-		
+
 		double scoutPatrolBuildTime = getBaseItemBuildTime(baseId, BSC_SCOUT_PATROL);
 		double extraScoutPatrols = scoutPatrolBuildTime <= 0.0 ? 0.0 : coordinatorTravelTime / scoutPatrolBuildTime;
 		extraWeight = factionInfo.maxConDefenseValue <= 0 ? INF : extraScoutPatrols / (double)factionInfo.maxConDefenseValue;
-		
+
 	}
-	
+
 	debug("\textraWeight=%5.2f\n", extraWeight);
-	
+
 	// recompute destructionRatio
-	
+
 	destructionRatio = getDestructionRatio();
 	requiredSuperioritySatisfied = destructionRatio >= requiredSuperiority;
-	
+
 	debug("\tdestructionRatio=%5.2f requiredSuperioritySatisfied=%d\n", destructionRatio, requiredSuperioritySatisfied);
-	
+
 }
 
 // utility methods
@@ -820,7 +820,7 @@ bool isZoc(MAP *orgTile, MAP *dstTile)
 {
 	assert(isOnMap(orgTile) && isOnMap(dstTile));
 	return aiData.tileInfos.at(orgTile - *MapTiles).orgZoc && aiData.tileInfos.at(dstTile - *MapTiles).dstZoc;
-	
+
 }
 
 // AssaultEffect
@@ -829,9 +829,9 @@ double AssaultEffect::getEffect(double attackMultiplier, double defendMultiplier
 {
 	double attackEffect = attackMultiplier * this->attack;
 	double defendEffect = defendMultiplier * this->defend;
-	
+
 	double effect = 0.0;
-	
+
 	if (attackEffect <= defendEffect)
 	{
 		effect = attackEffect;
@@ -840,9 +840,9 @@ double AssaultEffect::getEffect(double attackMultiplier, double defendMultiplier
 	{
 		effect = speedFactor * attackEffect + (1.0 - speedFactor) * defendEffect;
 	}
-	
+
 	return effect;
-	
+
 }
 
 // ProtectCombatData
@@ -853,45 +853,45 @@ Selects the best effect against not yet countered foe unit.
 UnitEffectResult ProtectCombatData::getUnitEffectResult(int unitId) const
 {
 	Profiling::start("- getUnitEffectResult");
-	
+
 	int bestFoeFactionId = -1;
 	int bestFoeUnitId = -1;
 	double bestEffect = 0.0;
-	
+
 	for (int foeFactionId = 0; foeFactionId < MaxPlayerNum; foeFactionId++)
 	{
 		robin_hood::unordered_flat_map<int, CounterEffect> const &foeFactionCounterEffect = counterEffects.at(foeFactionId);
-		
+
 		for (robin_hood::pair<int, CounterEffect> const &foeFactionUnitCounterEffectEntry : foeFactionCounterEffect)
 		{
 			int foeUnitId = foeFactionUnitCounterEffectEntry.first;
 			CounterEffect const &counterEffect = foeFactionUnitCounterEffectEntry.second;
-			
+
 			if (counterEffect.isSatisfied(false))
 				continue;
-			
+
 			int assailantOffenseExtendedTriad = getUnitOffenseExtendedTriad(foeUnitId, unitId);
-			
+
 			double attackMultiplier = sensorOffenseMultipliers.at(foeFactionId) / sensorDefenseMultipliers.at(aiFactionId) / tileDefenseMultipliers.at(assailantOffenseExtendedTriad);
 			double defendMultiplier = sensorOffenseMultipliers.at(foeFactionId) / sensorOffenseMultipliers.at(aiFactionId);
-			
+
 			double assaultEffect = aiData.combatEffectTable.getAssaultEffect(foeFactionId, foeUnitId, aiFactionId, unitId).getEffect(attackMultiplier, defendMultiplier);
 			double protectEffect = assaultEffect <= 0.0 ? 0.0 : 1.0 / assaultEffect;
-			
+
 			if (protectEffect > bestEffect)
 			{
 				bestFoeFactionId = foeFactionId;
 				bestFoeUnitId = foeUnitId;
 				bestEffect = protectEffect;
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	Profiling::stop("- getUnitEffectResult");
 	return {bestFoeFactionId, bestFoeUnitId, bestEffect};
-	
+
 }
 double ProtectCombatData::getUnitEffect(int unitId) const
 {
@@ -899,36 +899,36 @@ double ProtectCombatData::getUnitEffect(int unitId) const
 }
 double ProtectCombatData::getVehicleEffect(int vehicleId) const
 {
-	return getVehicleMoraleMultiplier(vehicleId) * getUnitEffect(Vehicles[vehicleId].unit_id);
+	return getVehicleMoraleMultiplier(vehicleId) * getUnitEffect(Vehs[vehicleId].unit_id);
 }
 /*
 Adds vehicle effect too all counter effects until it runs out.
 */
 void ProtectCombatData::addVehicleEffect(int vehicleId, bool present)
 {
-	int unitId = Vehicles[vehicleId].unit_id;
+	int unitId = Vehs[vehicleId].unit_id;
 	double multiplier = getVehicleMoraleMultiplier(vehicleId);
-	
+
 	double relativePower = 1.0;
 	for (UnitEffectResult unitEffectResult = getUnitEffectResult(unitId); unitEffectResult.effect > 0.0; unitEffectResult = getUnitEffectResult(unitId))
 	{
 		CounterEffect &counterEffect = counterEffects.at(unitEffectResult.foeFactionId).at(unitEffectResult.foeUnitId);
 		double effect = multiplier * unitEffectResult.effect * relativePower;
-		
+
 		double required = counterEffect.required;
 		double provided = counterEffect.provided;
 		double applicable = required - provided;
 		double applied = std::min(applicable, effect);
 		double remained = effect - applied;
 		relativePower *= remained / effect;
-		
+
 		counterEffect.provided += applied;
 		if (present)
 		{
 			counterEffect.providedPresent += applied;
 		}
-		
+
 	}
-	
+
 }
 

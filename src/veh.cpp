@@ -839,7 +839,7 @@ GOODY_START:
                 if (conf.rare_supply_pods && prod_cost - minerals > 40 + goody_rand(60)) {
                     goto GOODY_NEXT;
                 }
-				
+
 				// [WTP]
 				// fixed instant completion minerals
 				if (conf.instant_completion_fixed_minerals > 0)
@@ -851,7 +851,7 @@ GOODY_START:
                 Bases[fc_base_id].minerals_accumulated = prod_cost;
 				}
 				//
-				
+
                 if (is_player) {
                     parse_says(1, &Bases[fc_base_id].name[0], -1, -1);
                     NetMsg_pop(NetMsg, "GOODYBUILD", -5000, 0, "indbm_sm.pcx");
@@ -1510,11 +1510,11 @@ the original without any differences to the final calculation.
 */
 int __cdecl mod_proto_cost(VehChassis chassis_id, VehWeapon weapon_id,
 VehArmor armor_id, VehAblFlag ability, VehReactor reactor_id) {
-	
+
 	// [WTP]
 	// redirect to WTP version
 	return wtp_mod_proto_cost(chassis_id, weapon_id, armor_id, ability, reactor_id);
-	
+
     uint8_t weap_cost = Weapon[weapon_id].cost;
     // PB check: moved to start vs after 1st triad checks in original > no difference in logic
     if (Chassis[chassis_id].missile && Weapon[weapon_id].offense_value >= 99) {
@@ -1667,12 +1667,12 @@ int __cdecl mod_veh_cost(int unit_id, int base_id, int32_t* has_proto_cost) {
     if (has_proto_cost) {
         *has_proto_cost = proto_cost_first != 0;
     }
-    
+
     // [WTP] no assertion needed as cost can actually be modded
     /*
     assert(cost == veh_cost(unit_id, base_id, 0));
     */
-    
+
     return cost;
 }
 
@@ -2083,16 +2083,16 @@ int __cdecl mod_stack_check(int veh_id, int type, int cond1, int cond2, int cond
 int __cdecl mod_veh_init(int unit_id, int faction_id, int x, int y) {
     int veh_id = veh_init(unit_id, faction_id, x, y);
     if (veh_id >= 0) {
-        Vehicles[veh_id].home_base_id = -1;
+        Vehs[veh_id].home_base_id = -1;
         // Set these flags to disable any non-Thinker unit automation.
-        Vehicles[veh_id].state |= VSTATE_UNK_40000;
-        Vehicles[veh_id].state &= ~VSTATE_UNK_2000;
+        Vehs[veh_id].state |= VSTATE_UNK_40000;
+        Vehs[veh_id].state &= ~VSTATE_UNK_2000;
     }
     return veh_id;
 }
 
 int __cdecl mod_veh_kill(int veh_id) {
-    VEH* veh = &Vehicles[veh_id];
+    VEH* veh = &Vehs[veh_id];
     debug("disband %2d %2d %s\n", veh->x, veh->y, veh->name());
     veh_kill(veh_id);
     return VEH_SKIP;
@@ -2141,6 +2141,15 @@ int __cdecl mod_veh_skip(int veh_id) {
     }
     veh->moves_spent = moves;
     return moves;
+}
+
+/*
+Purpose: Initialize/reset the fake veh_id used as a placeholder for various UI elements.
+Return Value: veh_id (not used by active vehs, original value 2048)
+*/
+int __cdecl mod_veh_fake(int unit_id, int faction_id) {
+    veh_clear(conf.max_veh_num, unit_id, faction_id);
+    return conf.max_veh_num;
 }
 
 int __cdecl mod_veh_wake(int veh_id) {

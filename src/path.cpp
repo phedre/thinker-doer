@@ -464,7 +464,7 @@ int move_to_base(int veh_id, bool ally) {
 }
 
 int escape_move(const int id) {
-    VEH* veh = &Vehicles[id];
+    VEH* veh = &Vehs[id];
     MAP* sq = mapsq(veh->x, veh->y);
     if (defend_tile(veh, sq)) {
         return set_order_none(id);

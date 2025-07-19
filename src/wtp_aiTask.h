@@ -61,7 +61,7 @@ struct Task
 	int terraformingAction;
 
 	Task(int _vehicleId, TaskType _type, MAP *_destination, MAP *_attackTarget, int _order, int _terraformingAction)
-	: vehiclePad0(Vehicles[_vehicleId].pad_0), type(_type), destination(_destination), attackTarget(_attackTarget), order(_order), terraformingAction(_terraformingAction)
+	: vehiclePad0(Vehs[_vehicleId].pad_0), type(_type), destination(_destination), attackTarget(_attackTarget), order(_order), terraformingAction(_terraformingAction)
 	{}
 	Task(int _vehicleId, TaskType _type, MAP *_destination, MAP *_attackTarget)
 	: Task(_vehicleId, _type, _destination, _attackTarget, -1, -1)
@@ -72,7 +72,7 @@ struct Task
 	Task(int _vehicleId, TaskType _type)
 	: Task(_vehicleId, _type, nullptr, nullptr, -1, -1)
 	{}
-	
+
 	static std::string typeName(TaskType &taskType);
 	int getVehicleId();
 	void clearDestination();

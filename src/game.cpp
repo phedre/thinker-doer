@@ -151,7 +151,7 @@ void init_save_game(int faction_id) {
         || u->chassis_id < CHS_INFANTRY
         || u->chassis_id > CHS_MISSILE) {
             for (int j = *VehCount-1; j >= 0; j--) {
-                if (Vehicles[j].unit_id == unit_id) {
+                if (Vehs[j].unit_id == unit_id) {
                     veh_kill(j);
                 }
             }

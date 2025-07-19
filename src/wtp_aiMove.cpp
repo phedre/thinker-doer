@@ -36,26 +36,26 @@ void SeaTransit::copy(SeaTransit &seaTransit)
 void moveStrategy()
 {
 	Profiling::start("moveStrategy", "strategy");
-	
+
 	debug("moveStrategy - %s\n", MFactions[aiFactionId].noun_faction);
-	
+
 	// vanilla fix for transport dropoff
-	
+
 	fixUndesiredTransportDropoff();
-	
+
 	moveAllStrategy();
 	moveArtifactStrategy();
 	moveCombatStrategy();
 	moveColonyStrategy();
 	moveFormerStrategy();
 	moveCrawlerStrategy();
-	
+
 	// transport
-	
+
 	moveTranportStrategy();
-	
+
 	Profiling::stop("moveStrategy");
-	
+
 }
 
 /*
@@ -65,10 +65,10 @@ restore boarded units order back to SENTRY/BOARD so they be able to coninue tran
 void fixUndesiredTransportDropoff()
 {
 	Profiling::start("fixUndesiredTransportDropoff", "moveStrategy");
-	
+
 	for (int vehicleId : aiData.vehicleIds)
 	{
-		VEH *vehicle = &(Vehicles[vehicleId]);
+		VEH *vehicle = &(Vehs[vehicleId]);
 
 		// verify transportVehicleId is set
 
@@ -86,7 +86,7 @@ void fixUndesiredTransportDropoff()
 
 		// get transport vehicle
 
-		VEH *transportVehicle = &(Vehicles[transportVehicleId]);
+		VEH *transportVehicle = &(Vehs[transportVehicleId]);
 
 		// verify transportVehicle is in same location
 
@@ -100,7 +100,7 @@ void fixUndesiredTransportDropoff()
 	}
 
 	Profiling::stop("fixUndesiredTransportDropoff");
-	
+
 }
 
 /*
@@ -110,56 +110,56 @@ set their order to hold to prevent this
 void fixUndesiredTransportPickup()
 {
 	Profiling::start("fixUndesiredTransportPickup", "");
-	
+
 	for (int vehicleId = 0; vehicleId < *VehCount; vehicleId++)
 	{
-		VEH *vehicle = &(Vehicles[vehicleId]);
+		VEH *vehicle = &(Vehs[vehicleId]);
 		MAP *vehicleTile = getVehicleMapTile(vehicleId);
-		
+
 		// AI vehicle
-		
+
 		if (vehicle->faction_id != aiFactionId)
 			continue;
-		
+
 		// verify vehicle is at own base
-		
+
 		if (!(vehicleTile->owner == aiFactionId && map_has_item(vehicleTile, BIT_BASE_IN_TILE)))
 			continue;
-		
+
 		// verify vehicle is idle
-		
+
 		if (!(vehicle->order == ORDER_NONE))
 			continue;
-		
+
 		// put vehicle on hold
-		
+
 		setVehicleOrder(vehicleId, ORDER_HOLD);
-		
+
 	}
-	
+
 	Profiling::stop("fixUndesiredTransportPickup");
-	
+
 }
 
 void moveAllStrategy()
 {
 	Profiling::start("moveAllStrategy", "moveStrategy");
-	
+
 	// heal
 
 	healStrategy();
 
 	Profiling::stop("moveAllStrategy");
-	
+
 }
 
 void healStrategy()
 {
 	Profiling::start("- healStrategy");
-	
+
 	for (int vehicleId : aiData.vehicleIds)
 	{
-		VEH *vehicle = &(Vehicles[vehicleId]);
+		VEH *vehicle = &(Vehs[vehicleId]);
 		MAP *vehicleTile = getVehicleMapTile(vehicleId);
 
 		// exclude ogres
@@ -275,7 +275,7 @@ void healStrategy()
 	}
 
 	Profiling::stop("- healStrategy");
-	
+
 }
 
 /*
@@ -306,41 +306,41 @@ int lastEnemyMoveVehicleX = -1;
 int lastEnemyMoveVehicleY = -1;
 int enemyMoveVehicle(const int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
-	
+	VEH *vehicle = &(Vehs[vehicleId]);
+
 	debug("enemyMoveVehicle [%4d] %s %2d %s\n", vehicleId, getLocationString(getVehicleMapTile(vehicleId)).c_str(), getVehicleRemainingMovement(vehicleId), Units[vehicle->unit_id].name);
-	
+
 	// fall over to default if vehicle did not move since last iteration
-	
+
 	if (vehicle->order == ORDER_MOVE_TO && vehicleId == lastEnemyMoveVehicleId && vehicle->x == lastEnemyMoveVehicleX && vehicle->y == lastEnemyMoveVehicleY)
 	{
 		return enemy_move(vehicleId);
 	}
-	
+
 	// set last values
-	
+
 	lastEnemyMoveVehicleId = vehicleId;
 	lastEnemyMoveVehicleX = vehicle->x;
 	lastEnemyMoveVehicleY = vehicle->y;
-	
+
 	// execute task
-	
+
 	if (hasExecutableTask(vehicleId))
 	{
 		return executeTask(vehicleId);
 	}
-	
+
     // use vanilla algorithm for non defensive probes
-	
+
     if (isProbeVehicle(vehicleId) && !isInfantryVehicle(vehicleId))
 	{
 		return enemy_move(vehicleId);
 	}
-	
+
 	// unhandled cases handled by default
-	
+
 	return enemy_move(vehicleId);
-	
+
 }
 
 /**
@@ -352,7 +352,7 @@ bool transitVehicle(Task task)
 	const bool TRACE = DEBUG && false;
 
 	int vehicleId = task.getVehicleId();
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 	MAP *vehicleTile = getVehicleMapTile(vehicleId);
 	MAP *destination = task.getDestination();
 
@@ -443,51 +443,51 @@ bool transitLandVehicle(Task task)
 {
 	int vehicleId = task.getVehicleId();
 	MAP *destination = task.getDestination();
-	
+
 	assert(vehicleId >= 0 && vehicleId < *VehCount);
 	assert(destination >= *MapTiles && destination < *MapTiles + *MapAreaTiles);
-	
-	VEH *vehicle = &(Vehicles[vehicleId]);
+
+	VEH *vehicle = &(Vehs[vehicleId]);
 	MAP *vehicleTile = getVehicleMapTile(vehicleId);
 	TileInfo &vehicleTileInfo = aiData.getVehicleTileInfo(vehicleId);
-	
+
 	// land vehicle
-	
+
 	if (vehicle->triad() != TRIAD_LAND)
 		return false;
-	
+
 	// valid destination
-	
+
 	if (destination == nullptr)
 		return false;
-	
+
 	// transport
-	
+
 	int transportId = getVehicleTransportId(vehicleId);
-	
+
 	if (transportId != -1)
 	{
 		// sea transport
-		
+
 		if (!isSeaTransportVehicle(transportId))
 			return false;
-		
+
 		// find dropoff transfer
-		
+
 		Transfer transfer = getOptimalDropoffTransfer(vehicleTile, destination, vehicleId, transportId);
-		
+
 		if (!transfer.valid())
 			return false;
-		
+
 		// set unboarding task and add unload request
-		
+
 		task.type = TT_UNBOARD;
 		task.destination = transfer.passengerStop;
 		setTask(task);
 		aiData.transportControl.addUnloadRequest(transportId, vehicleId, transfer.transportStop, transfer.passengerStop);
-		
+
 		return true;
-		
+
 	}
 	else if (!vehicleTileInfo.ocean && isSameLandCluster(vehicleTile, destination)) // vehicle is on land and is moving to same land cluster
 	{
@@ -497,42 +497,42 @@ bool transitLandVehicle(Task task)
 	else // requires transportation
 	{
 		// sometimes game may leave land vehicle in the water without transport - ignore this case
-		
+
 		if (!vehicleTileInfo.landAllowed)
 			return false;
-		
+
 		// find pickup transfer
-		
+
 		Transfer transfer = getOptimalPickupTransfer(vehicleTile, destination);
-		
+
 		if (!transfer.valid())
 			return false;
-		
+
 		// handle transit
-		
+
 		task.type = TT_BOARD;
 		task.destination = transfer.passengerStop;
 		setTask(task);
-		
+
 		if (vehicleTile == transfer.passengerStop)
 		{
 			// request transportation
-			
+
 			aiData.transportControl.transitRequests.emplace_back
 			(
 				vehicleId,
 				transfer.transportStop,
 				destination
 			);
-			
+
 		}
-		
+
 		return true;
-		
+
 	}
-	
+
 	return false;
-	
+
 }
 
 /**
@@ -541,101 +541,101 @@ Redistributes vehicle between bases to proportinally burden them with support.
 void balanceVehicleSupport()
 {
 	Profiling::start("balanceVehicleSupport", "");
-	
+
 	debug("balanceVehicleSupport - %s\n", aiMFaction->noun_faction);
-	
+
 	// find base with lowest/highest mineral surplus
-	
+
 	for (int baseId = 0; baseId < *BaseCount; baseId++)
 	{
 		BASE *base = getBase(baseId);
-		
+
 		// player faction base
-		
+
 		if (base->faction_id != aiFactionId)
 			continue;
-		
+
 		int support = base->mineral_intake_2 - base->mineral_surplus;
-		
+
 		if (support > 0 && base->mineral_surplus <= 1)
 		{
 			// find vehicle to reassign
-			
+
 			int reassignVehicleId = -1;
-			
+
 			for (int vehicleId = 0; vehicleId < *VehCount; vehicleId++)
 			{
-				VEH *vehicle = &(Vehicles[vehicleId]);
-				
+				VEH *vehicle = &(Vehs[vehicleId]);
+
 				// this home base
-				
+
 				if (vehicle->home_base_id != baseId)
 					continue;
-				
+
 				reassignVehicleId = vehicleId;
 				break;
-				
+
 			}
-			
+
 			// not found
-			
+
 			if (reassignVehicleId == -1)
 				continue;
-			
+
 			// find base to reassign to
-			
+
 			for (int otherBaseId = 0; otherBaseId < *BaseCount; otherBaseId++)
 			{
 				BASE *otherBase = getBase(otherBaseId);
-				
+
 				// player faction base
-				
+
 				if (otherBase->faction_id != aiFactionId)
 					continue;
-				
+
 				// exclude self
-				
+
 				if (otherBaseId == baseId)
 					continue;
-				
+
 				// exclude project base
-				
+
 				if (isBaseBuildingProject(otherBaseId))
 					continue;
-				
+
 				// compute relative support
-				
+
 				double otherBaseRelativeSupport = 1.0 - (double)otherBase->mineral_surplus / (double)otherBase->mineral_intake_2;
-				
+
 				// check support/surplus
-				
+
 				if (otherBase->mineral_surplus >= 4 && otherBaseRelativeSupport < conf.ai_production_support_ratio)
 				{
 					// reassign
 
 					getVehicle(reassignVehicleId)->home_base_id = otherBaseId;
-					
+
 					// compute both bases
-					
+
 					Profiling::start("- balanceVehicleSupport - computeBase");
 					computeBase(baseId, false);
 					computeBase(otherBaseId, false);
 					Profiling::stop("- balanceVehicleSupport - computeBase");
-					
+
 					// exit cycle
-					
+
 					break;
-					
+
 				}
-				
+
 			}
-			
+
 		}
-		
+
 	}
-	
+
 	Profiling::stop("balanceVehicleSupport");
-	
+
 }
 
 // ==================================================
@@ -647,35 +647,35 @@ Modified vehicle movement.
 */
 int __cdecl wtp_mod_ai_enemy_move(const int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
-	
+	VEH *vehicle = &(Vehs[vehicleId]);
+
 	int returnValue;
-	
+
 	// choose AI logic
-	
+
 	if (isWtpEnabledFaction(vehicle->faction_id) || (aiFactionId == *CurrentPlayerFaction && conf.manage_player_units && ((vehicle->state & VSTATE_ON_ALERT) != 0) && vehicle->movement_turns == 0))
 	{
 		// run WTP AI code for AI eanbled factions or human player managed units
-		
+
 		Profiling::start("| enemyMoveVehicle");
 		returnValue = enemyMoveVehicle(vehicleId);
 		Profiling::stop("| enemyMoveVehicle");
-		
+
 	}
 	else
 	{
 		// default
-		
+
 		Profiling::start("~ mod_enemy_move");
 		returnValue = mod_enemy_move(vehicleId);
 		Profiling::stop("~ mod_enemy_move");
-		
+
 	}
-	
+
 	// return
-	
+
 	return returnValue;
-	
+
 }
 
 /*
@@ -683,57 +683,57 @@ Searches for allied base where vehicle can get into.
 */
 MAP *getNearestFriendlyBase(int vehicleId)
 {
-	VEH *vehicle = &(Vehicles[vehicleId]);
+	VEH *vehicle = &(Vehs[vehicleId]);
 	int triad = vehicle->triad();
 	MAP *vehicleTile = getVehicleMapTile(vehicleId);
-	
+
 	MAP *nearestBaseLocation = nullptr;
-	
+
 	// iterate bases
-	
+
 	int minRange = INT_MAX;
 	for (int baseId = 0; baseId < *BaseCount; baseId++)
 	{
 		BASE *base = &(Bases[baseId]);
 		MAP *baseTile = getBaseMapTile(baseId);
-		
+
 		// friendly base only
-		
+
 		if (!isFriendly(aiFactionId, base->faction_id))
 			continue;
-		
+
 		// same cluster for surface vehicle
-		
+
 		switch (triad)
 		{
 		case TRIAD_SEA:
-			
+
 			if (!isSameSeaCluster(vehicleTile, baseTile))
 				continue;
-			
+
 			break;
-			
+
 		case TRIAD_LAND:
-			
+
 			if (!isSameLandCluster(vehicleTile, baseTile))
 				continue;
-			
+
 			break;
-			
+
 		}
-		
+
 		int range = map_range(vehicle->x, vehicle->y, base->x, base->y);
-		
+
 		if (range < minRange)
 		{
 			nearestBaseLocation = baseTile;
 			minRange = range;
 		}
-		
+
 	}
-	
+
 	return nearestBaseLocation;
-	
+
 }
 
 /*
@@ -789,109 +789,109 @@ MAP *getNearestMonolith(int x, int y, int triad)
 Transfer getOptimalPickupTransfer(MAP *org, MAP *dst)
 {
 	debug("getOptimalPickupTransfer %s -> %s\n", getLocationString(org).c_str(), getLocationString(dst).c_str());
-	
+
 	TileInfo &orgTileInfo = aiData.getTileInfo(org);
-	
+
 	// populate available transfers
-	
+
 	std::vector<Transfer> transfers;
-	
+
 	if (orgTileInfo.ocean && orgTileInfo.base) // org is sea base
 	{
 		std::vector<Transfer> const &oceanBaseTransfers = getOceanBaseTransfers(org);
 		transfers.insert(transfers.end(), oceanBaseTransfers.begin(), oceanBaseTransfers.end());
-		
+
 	}
 	else if (!orgTileInfo.ocean) // org is land
 	{
 		int orgCluster = getCluster(org);
-		
+
 		for (int firstConnectedCluster : getFirstConnectedClusters(org, dst))
 		{
 			std::vector<Transfer> const &firstConnectedClusterTransfers = getTransfers(orgCluster, firstConnectedCluster);
 			transfers.insert(transfers.end(), firstConnectedClusterTransfers.begin(), firstConnectedClusterTransfers.end());
 		}
-		
+
 	}
-	
+
 	// select best transfer
-	
+
 	Transfer bestTransfer;
 	int bestTransferTotalRange = INT_MAX;
-	
+
 	for (Transfer const &transfer : transfers)
 	{
 		int passengerStopRange = getRange(org, transfer.passengerStop);
 		int transportStopRange = getRange(transfer.transportStop, dst);
 		int totalRange = passengerStopRange + transportStopRange;
-		
+
 		if (totalRange < bestTransferTotalRange)
 		{
 			bestTransfer = transfer;
 			bestTransferTotalRange = totalRange;
 		}
-		
+
 	}
-	
+
 	return bestTransfer;
-	
+
 }
 
 Transfer getOptimalDropoffTransfer(MAP *org, MAP *dst, int passengerVehicleId, int transportVehicleId)
 {
 	debug("getOptimalDropoffTransfer %s -> %s\n", getLocationString(org).c_str(), getLocationString(dst).c_str());
-	
+
 	TileInfo &dstTileInfo = aiData.getTileInfo(dst);
 	int passengerSpeed = getVehicleSpeed(passengerVehicleId);
 	int transportSpeed = getVehicleSpeed(transportVehicleId);
-	
+
 	// populate available transfers
-	
+
 	std::vector<Transfer> transfers;
-	
+
 	if (isSameSeaCluster(org, dst) && dstTileInfo.ocean && dstTileInfo.base) // dst is in same sea cluster and dst is sea base
 	{
 		std::vector<Transfer> const &oceanBaseTransfers = getOceanBaseTransfers(dst);
 		transfers.insert(transfers.end(), oceanBaseTransfers.begin(), oceanBaseTransfers.end());
-		
+
 	}
 	else // all other cases
 	{
 		int orgCluster = getCluster(org);
-		
+
 		for (int firstConnectedCluster : getFirstConnectedClusters(org, dst))
 		{
 			std::vector<Transfer> const &firstConnectedClusterTransfers = getTransfers(firstConnectedCluster, orgCluster);
 			transfers.insert(transfers.end(), firstConnectedClusterTransfers.begin(), firstConnectedClusterTransfers.end());
 		}
-		
+
 	}
-	
+
 	// select best transfer
-	
+
 	Transfer bestTransfer;
 	double bestTransferTotalTravelTime = DBL_MAX;
-	
+
 	for (Transfer const &transfer : transfers)
 	{
 		// range to corresponding stops
-		
+
 		int transportStopRange = getRange(org, transfer.transportStop);
 		int passengerStopRange = getRange(transfer.passengerStop, dst);
-		
+
 		// estimated travel time
-		
+
 		double transportTravelTime = (double)transportStopRange / (double)transportSpeed;
 		double passengerTravelTime = (double)passengerStopRange / (double)passengerSpeed;
-		
+
 		double totalTravelTime = transportTravelTime + passengerTravelTime;
-		
+
 		if (totalTravelTime < bestTransferTotalTravelTime)
 		{
 			bestTransfer = transfer;
 			bestTransferTotalTravelTime = totalTravelTime;
 		}
-		
+
 		debug
 		(
 			"\t%s -> %s"
@@ -908,11 +908,11 @@ Transfer getOptimalDropoffTransfer(MAP *org, MAP *dst, int passengerVehicleId, i
 			, passengerTravelTime
 			, totalTravelTime
 		);
-		
+
 	}
-	
+
 	return bestTransfer;
-	
+
 }
 
 /*
@@ -921,29 +921,29 @@ Sends vehicle along safest travel waypoints.
 void setSafeMoveTo(int vehicleId, MAP *destination)
 {
 	debug("setSafeMoveTo [%4d] -> %s\n", vehicleId, getLocationString(destination).c_str());
-	
+
 	MAP *bestTile = destination;
 	double bestTileWeight = DBL_MAX;
-	
+
 	bool dangerous = false;
-	
+
 	Profiling::start("- setSafeMoveTo - getVehicleReachableLocations");
 	for (robin_hood::pair<int, int> const &reachableLocation : getVehicleReachableLocations(vehicleId))
 	{
 		int tileIndex = reachableLocation.first;
 		MAP *tile = *MapTiles + tileIndex;
 		TileInfo &tileInfo = aiData.tileInfos.at(tileIndex);
-		
+
 		double danger = tileInfo.hostileDangerZone ? 1.0 : 0.0;
 		double distance = getEuqlideanDistance(tile, destination);
 		double weight = danger + 0.2 * distance;
-		
+
 		if (weight < bestTileWeight)
 		{
 			bestTile = tile;
 			bestTileWeight = weight;
 		}
-		
+
 //		debug
 //		(
 //			"%s"
@@ -960,10 +960,10 @@ void setSafeMoveTo(int vehicleId, MAP *destination)
 //			, dangerous
 //			, weight < bestTileWeight
 //		);
-	
+
 	}
 	Profiling::stop("- setSafeMoveTo - getVehicleReachableLocations");
-	
+
 	if (!dangerous || bestTile == destination)
 	{
 		setMoveTo(vehicleId, destination);
@@ -972,7 +972,7 @@ void setSafeMoveTo(int vehicleId, MAP *destination)
 	{
 		setMoveTo(vehicleId, {bestTile, destination});
 	}
-	
+
 }
 
 /*
@@ -980,45 +980,45 @@ Ends combat vehicle turn at the best tile.
 */
 void setCombatMoveTo(int vehicleId, MAP *destination)
 {
-	VEH &vehicle = Vehicles[vehicleId];
+	VEH &vehicle = Vehs[vehicleId];
 	int factionId = vehicle.faction_id;
 	int triad = vehicle.triad();
 	MAP *vehicleTile = getVehicleMapTile(vehicleId);
 	bool fungusBonus = isNativeVehicle(vehicleId) || has_project(FAC_XENOEMPATHY_DOME, factionId);
-	
+
 	debug("setCombatMoveTo [%4d] %s -> %s\n", vehicleId, getLocationString(vehicleTile).c_str(), getLocationString(destination).c_str());
-	
+
 	// not land unit moves normally
-	
+
 	if (triad != TRIAD_LAND)
 	{
 		debug("\tnot land\n");
 		setMoveTo(vehicleId, destination);
 		return;
 	}
-	
+
 	// not in the same cluster
-	
+
 	if (!isSameLandCluster(vehicleTile, destination))
 	{
 		debug("\tnot in same land cluster\n");
 		setMoveTo(vehicleId, destination);
 		return;
 	}
-	
+
 	// no need for best location when vehicle is not in the danger zone
-	
+
 	if (aiData.hostileEndangeredVehicleIds.find(vehicleId) == aiData.hostileEndangeredVehicleIds.end())
 	{
 		debug("\tnot hostileEndangeredVehicle\n");
 		setMoveTo(vehicleId, destination);
 		return;
 	}
-	
+
 	MAP *bestTile = nullptr;
 	double bestTileTravelTime = DBL_MAX;
 	int bestTileSafety = 0;
-	
+
 	Profiling::start("- setCombatMoveTo - getVehicleReachableLocations");
 	for (robin_hood::pair<int, int> const &reachableLocation : getVehicleReachableLocations(vehicleId))
 	{
@@ -1026,11 +1026,11 @@ void setCombatMoveTo(int vehicleId, MAP *destination)
 		MAP *tile = *MapTiles + tileIndex;
 		TileInfo &tileInfo = aiData.tileInfos.at(tileIndex);
 		int safety = 10 * (tileInfo.hostileDangerZone ? 0 : 1) + 1 * (tileInfo.rough || (fungusBonus && tile->is_fungus()) ? 1 : 0);
-		
+
 		double travelTime = getVehicleTravelTime(vehicleId, tile, destination, false);
 		if (travelTime == INF)
 			continue;
-		
+
 		if (travelTime <= bestTileTravelTime - 1.0)
 		{
 			bestTile = tile;
@@ -1047,7 +1047,7 @@ void setCombatMoveTo(int vehicleId, MAP *destination)
 		{
 			continue;
 		}
-		
+
 		debug
 		(
 			"%s"
@@ -1058,10 +1058,10 @@ void setCombatMoveTo(int vehicleId, MAP *destination)
 			, travelTime
 			, safety
 		);
-	
+
 	}
 	Profiling::stop("- setCombatMoveTo - getVehicleReachableLocations");
-	
+
 	if (bestTile == nullptr)
 	{
 		setMoveTo(vehicleId, destination);
@@ -1070,7 +1070,7 @@ void setCombatMoveTo(int vehicleId, MAP *destination)
 	{
 		setMoveTo(vehicleId, {bestTile, destination});
 	}
-	
+
 }
 
 /**
@@ -1082,62 +1082,62 @@ factionId = aiFactionId
 MapDoubleValue findClosestMonolith(int vehicleId, int maxSearchRange, bool avoidWarzone)
 {
 	Profiling::start("- findClosestMonolith");
-	
+
 	VEH *vehicle = getVehicle(vehicleId);
 	int triad = vehicle->triad();
 	MAP *vehicleTile = getVehicleMapTile(vehicleId);
-	
+
 	MAP *closestMonolith = nullptr;
 	double closestMonolithTravelTime = INF;
-	
+
 	for (MAP *tile : aiData.monoliths)
 	{
 		int range = getRange(vehicleTile, tile);
-		
+
 		if (range > maxSearchRange)
 			continue;
-		
+
 		bool ocean = is_ocean(tile);
-		
+
 		// corresponding realm
-		
+
 		if ((triad == TRIAD_LAND && ocean) || (triad == TRIAD_SEA && !ocean))
 			continue;
-		
+
 		// item
-		
+
 		if (!map_has_item(tile, BIT_MONOLITH))
 			continue;
-		
+
 		// exclude blocked location
-		
+
 		if (isBlocked(tile))
 			continue;
-		
+
 		// exclude warzone if requested
-		
+
 		if (avoidWarzone && isWarzone(tile))
 			continue;
-		
+
 		// get travel time
-		
+
 		double travelTime = getVehicleTravelTime(vehicleId, tile);
 		if (travelTime == INF)
 			continue;
-		
+
 		// update best
-		
+
 		if (travelTime < closestMonolithTravelTime)
 		{
 			closestMonolith = tile;
 			closestMonolithTravelTime = travelTime;
 		}
-		
+
 	}
-	
+
 	Profiling::stop("- findClosestMonolith");
 	return {closestMonolith, closestMonolithTravelTime};
-	
+
 }
 
 /*
@@ -1147,99 +1147,99 @@ If none found, searches for any closest safe location (from unfriendly or hostil
 MAP *getSafeLocation(int vehicleId, bool unfriendly)
 {
 	Profiling::start("- getSafeLocation");
-	
-	VEH &vehicle = Vehicles[vehicleId];
+
+	VEH &vehicle = Vehs[vehicleId];
 	MAP *vehicleTile = getVehicleMapTile(vehicleId);
 	int triad = vehicle.triad();
-	
+
 	// artifact
-	
+
 	if (!isArtifactVehicle(vehicleId))
 	{
 		Profiling::stop("- getSafeLocation");
 		return nullptr;
 	}
-	
+
 	// infantry chassis
-	
+
 	if (vehicle.chassis_type() != CHS_INFANTRY)
 	{
 		Profiling::stop("- getSafeLocation");
 		return nullptr;
 	}
-	
+
 	// exclude transported land vehicle
-	
+
 	if (isLandVehicleOnTransport(vehicleId))
 	{
 		Profiling::stop("- getSafeLocation");
 		return nullptr;
 	}
-	
+
 	// search closest safe location
-	
+
 	for (MAP *tile : getRangeTiles(vehicleTile, MAX_SAFE_LOCATION_SEARCH_RANGE, true))
 	{
 		TileInfo &tileInfo = aiData.getTileInfo(tile);
-		
+
 		// in same cluster for surface vechile
-		
+
 		switch (triad)
 		{
 		case TRIAD_SEA:
-			
+
 			if (!isSameSeaCluster(vehicleTile, tile))
 				continue;
-			
+
 			break;
-			
+
 		case TRIAD_LAND:
-			
+
 			if (!isSameLandCluster(vehicleTile, tile))
 				continue;
-			
+
 			break;
-			
+
 		}
-		
+
 		if (map_has_item(tile, BIT_BASE_IN_TILE) && isFriendly(vehicle.faction_id, tile->owner))
 		{
 			// base is a best safe location
 			Profiling::stop("- getSafeLocation");
 			return tile;
 		}
-		
+
 		if ((triad == TRIAD_LAND || triad == TRIAD_SEA) && map_has_item(tile, BIT_BUNKER) && !isBlocked(tile))
 		{
 			// not blocked bunker is a safe location for surface vehicle
 			Profiling::stop("- getSafeLocation");
 			return tile;
 		}
-		
+
 		// not fungus
-		
+
 		if (map_has_item(tile, BIT_FUNGUS))
 			continue;
-		
+
 		// not blocked
-		
+
 		if (tileInfo.blocked)
 			continue;
-		
+
 		// not danger zone
-		
+
 		if (unfriendly ? tileInfo.unfriendlyDangerZone : tileInfo.hostileDangerZone)
 			continue;
-		
+
 		Profiling::stop("- getSafeLocation");
 		return tile;
-		
+
 	}
-	
+
 	// nothing found
-	
+
 	Profiling::stop("- getSafeLocation");
 	return nullptr;
-	
+
 }
 

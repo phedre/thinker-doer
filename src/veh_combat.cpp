@@ -101,7 +101,7 @@ void __cdecl mod_say_morale2(char* output, int veh_id, int faction_id_vs_native)
         int morale_penalty = !native_unit && morale > 0 && veh->home_base_id >= 0
             && Bases[veh->home_base_id].state_flags & BSTATE_DRONE_RIOTS_ACTIVE
             && !(MFactions[faction_id].rule_flags & RFLAG_MORALE);
-		
+
 		// [WTP]
 		// disable home base morale effect
 		if (conf.disable_home_base_morale_effect)
@@ -110,7 +110,7 @@ void __cdecl mod_say_morale2(char* output, int veh_id, int faction_id_vs_native)
 			morale_penalty = 0;
 		}
 		//
-		
+
         int base_id = base_at(Vehs[veh_id].x, Vehs[veh_id].y);
         if (base_id >= 0 && morale < MORALE_ELITE) {
             bool has_creche = has_fac_built(FAC_CHILDREN_CRECHE, base_id);
@@ -118,7 +118,7 @@ void __cdecl mod_say_morale2(char* output, int veh_id, int faction_id_vs_native)
             if (has_fac_built(FAC_HEADQUARTERS, base_id)) {
                 morale_modifier++;
             }
-            
+
 			// [WTP]
 			// disable current base morale effect
 			if (conf.disable_current_base_morale_effect)
@@ -142,7 +142,7 @@ void __cdecl mod_say_morale2(char* output, int veh_id, int faction_id_vs_native)
             }
 			}
 			//
-			
+
         }
         int morale_pending = Factions[faction_id].SE_morale_pending;
         if (!native_unit && (morale_pending == 2 || morale_pending == 3)) {
@@ -275,7 +275,7 @@ int __cdecl mod_morale_veh(int veh_id, int check_drone_riot, int faction_id_vs_n
     if (morale_flag && morale_modifier < 0) {
         morale_modifier = 0;
     }
-    
+
 	// [WTP]
 	// disable home base morale effect
 	if (conf.disable_home_base_morale_effect)
@@ -291,7 +291,7 @@ int __cdecl mod_morale_veh(int veh_id, int check_drone_riot, int faction_id_vs_n
     }
 	}
 	//
-	
+
     value = clamp(veh->morale + morale_modifier, 0, 6);
     return value;
 }
@@ -367,7 +367,7 @@ int __cdecl mod_get_basic_offense(int veh_id_atk, int veh_id_def, int psi_combat
     int base_id_atk = base_at(Vehs[veh_id_atk].x, Vehs[veh_id_atk].y);
     if (base_id_atk >= 0) {
         // Morale effects with CC/BP are modified. SE Morale has no longer effect on native units.
-		
+
 		// [WTP]
 		// disable current base morale effect
 		if (conf.disable_current_base_morale_effect)
@@ -390,7 +390,7 @@ int __cdecl mod_get_basic_offense(int veh_id_atk, int veh_id_def, int psi_combat
         }
 		}
 		//
-		
+
         if (unk_tgl) {
             int morale_pending = Factions[faction_id_atk].SE_morale_pending;
             if (!native_unit && morale_pending >= 2 && morale_pending <= 3) {
@@ -439,7 +439,7 @@ int __cdecl mod_get_basic_defense(int veh_id_def, int veh_id_atk, int psi_combat
         // Morale effects with CC/BP are modified. SE Morale has no longer effect on native units.
         bool native_unit = unit_id_def < MaxProtoFactionNum
             && (Units[unit_id_def].offense_value() < 0 || unit_id_def == BSC_SPORE_LAUNCHER);
-		
+
 		// [WTP]
 		// disable current base morale effect
 		if (conf.disable_current_base_morale_effect)
@@ -462,7 +462,7 @@ int __cdecl mod_get_basic_defense(int veh_id_def, int veh_id_atk, int psi_combat
         }
 		}
 		//
-		
+
         // Fix: manual has "Units in a headquarters base automatically gain +1 Morale when defending."
         if (has_fac_built(FAC_HEADQUARTERS, base_id_def)) {
             morale++;
@@ -480,7 +480,7 @@ int __cdecl mod_get_basic_defense(int veh_id_def, int veh_id_atk, int psi_combat
     && !native_unit && !has_abil(unit_id_def, ABL_DISSOCIATIVE_WAVE)) {
         morale -= 2;
     }
-    
+
     // [WTP]
     // very green morale does not have defense bonus
     if (conf.very_green_no_defense_bonus)
@@ -491,7 +491,7 @@ int __cdecl mod_get_basic_defense(int veh_id_def, int veh_id_atk, int psi_combat
 	{
     morale = clamp(morale, 1, 6);
 	}
-    
+
     VehBasicBattleMorale[1] = morale;
     morale += 6;
     int plan_def = Units[unit_id_def].plan;
@@ -562,21 +562,19 @@ static int __cdecl find_defender(int veh_id_def, int veh_id_atk, int check_arty)
         }
         int offense_out = 0;
         int defense_out = 0;
-        
+
 		// [WTP]
 		// wrap into wtp function
 		/*
         mod_battle_compute(veh_id_atk, veh_id, &offense_out, &defense_out, flags);
         */
         wtp_mod_battle_compute(veh_id_atk, veh_id, &offense_out, &defense_out, flags);
-        
+
         if (!offense_out) {
             break;
         }
-        int v1 = (veh->is_artifact() ? 1 : 10 * veh->reactor_type());
-        int v2 = clamp(v1 - veh->damage_taken, 0, 9999);
-        int score = offense_val * defense_out * v2 / v1 / offense_out / 8 - veh->offense_value();
-
+        int score = offense_val * defense_out * min(veh->cur_hitpoints(), 9999)
+            / veh->max_hitpoints() / offense_out / 8 - veh->offense_value();
         if (veh->plan() <= PLAN_NAVAL_TRANSPORT || veh->plan() == PLAN_TERRAFORM) {
             score *= 16;
         }
@@ -597,8 +595,8 @@ static int __cdecl find_defender(int veh_id_def, int veh_id_atk, int check_arty)
         || !mod_stack_check(veh_id, 3, TRIAD_AIR, -1, -1))) {
             score += 0x80000;
         }
-        score = veh_id + (score * MaxVehNum);
-        if (score > best_score) {
+        // Replace old score method to avoid overflow issues with larger veh_ids
+        if (score > best_score || (score == best_score && veh_id > best_veh_id)) {
             best_score = score;
             best_veh_id = veh_id;
         }
@@ -788,7 +786,7 @@ void __cdecl mod_battle_compute(int veh_id_atk, int veh_id_def, int* offense_out
         offense = mod_get_basic_offense(veh_id_atk, veh_id_def, psi_combat, is_bombard, 0);
         if (!veh_atk->is_probe()) {
             if (veh_id_def >= 0 && !combat_type) { // checking if isn't wpn vs wpn ; air toggle
-				
+
 				// [WTP]
 				// bunker ignores terrain if configured
                 if (sq_def && sq_def->is_fungus()
@@ -798,7 +796,7 @@ void __cdecl mod_battle_compute(int veh_id_atk, int veh_id_def, int* offense_out
                     offense = offense * 150 / 100;
                     add_bat(0, 50, label_get(338)); // Fungus
                 }
-				
+
                 if (psi_combat & 2 && veh_atk->is_resonance_weapon()) {
                     offense = offense * (ResonanceWeaponValue + 100) / 100;
                     add_bat(0, ResonanceWeaponValue, label_get(1110)); // Resonance Attack
@@ -890,14 +888,14 @@ void __cdecl mod_battle_compute(int veh_id_atk, int veh_id_def, int* offense_out
                 }
                 if (conf.planet_defense_bonus && faction_id_def) {
                     int planet_def = Factions[faction_id_def].SE_planet;
-                    
+
                     // [WTP]
                     // full planet defense bonus
                     /*
                     int modifier = planet_def * Rules->combat_psi_bonus_per_planet / 2;
                     */
                     int modifier = planet_def * Rules->combat_psi_bonus_per_planet;
-                    
+
                     if (modifier != 0) {
                         defense = defense * (modifier + 100) / 100;
                         add_bat(1, modifier, label_get(625)); // Planet
@@ -908,7 +906,7 @@ void __cdecl mod_battle_compute(int veh_id_atk, int veh_id_def, int* offense_out
                 int terrain_def = terrain_defense(veh_def, veh_atk);
                 assert(terrain_def == (veh_def->triad() == TRIAD_AIR ? 2 :
                     defense_value(faction_id_def, veh_def->x, veh_def->y, veh_id_def, veh_id_atk)));
-				
+
 				// [WTP]
 				// bunker ignores terrain if configured
 				if (conf.bunker_ignores_terrain && sq_def && sq_def->is_bunker())
@@ -916,7 +914,7 @@ void __cdecl mod_battle_compute(int veh_id_atk, int veh_id_def, int* offense_out
 					*VehBattleDisplayTerrain = NULL;
 					terrain_def = 2;
 				}
-				
+
                 bool plain_terrain = terrain_def <= 2;
                 if (veh_id_atk >= 0 && veh_atk->triad() == TRIAD_LAND) {
                     if (Rules->combat_artillery_bonus_altitude
@@ -1025,14 +1023,14 @@ void __cdecl mod_battle_compute(int veh_id_atk, int veh_id_def, int* offense_out
                 }
                 else if (base_id_def < 0 && sq_def && sq_def->is_bunker()
                 /*&& (veh_id_atk < 0 || veh_atk->triad() != TRIAD_AIR)*/) {
-                	
+
                 	// [WTP]
                 	// bunker defense bonus
                 	/*
                     def_multi = 150;
                     */
                     def_multi = 100 + (veh_id_atk >= 0 && veh_atk->triad() == TRIAD_AIR ? conf.bunker_bonus_aerial : conf.bunker_bonus_surface);
-                    
+
                     display_def = label_get(358); // Bunker
                 }
                 else if (is_arty && base_id_def < 0 && sq_def && !is_rocky
@@ -1307,14 +1305,14 @@ int __cdecl mod_battle_fight_2(int veh_id_atk, int offset, int tx, int ty, int t
     && !veh_def->is_missile()) {
         combat_type |= (CT_INTERCEPT|CT_AIR_DEFENSE|CT_WEAPON_ONLY);
     }
-    
+
 	// [WTP]
 	// wrap into wtp function
 	/*
     mod_battle_compute(veh_id_atk, veh_id_def, &offense_out, &defense_out, combat_type);
     */
     wtp_mod_battle_compute(veh_id_atk, veh_id_def, &offense_out, &defense_out, combat_type);
-    
+
     int veh_atk_hp = veh_atk->cur_hitpoints();
     int veh_def_hp = veh_def->cur_hitpoints();
     int veh_atk_val;
@@ -1416,7 +1414,7 @@ int __cdecl mod_battle_fight_2(int veh_id_atk, int offset, int tx, int ty, int t
         return 0;
     }
     veh_atk->state |= VSTATE_UNK_40;
-    
+
     // [WTP]
     // attacking non enemy vehicle is not considered an aggression or surprise attack if vehicle was in stack with legitimate enemy
     bool stack_enemy = false;
@@ -1431,7 +1429,7 @@ int __cdecl mod_battle_fight_2(int veh_id_atk, int offset, int tx, int ty, int t
 			}
 		}
 	}
-	
+
 	if (!stack_enemy)
 	{
     if (!veh_atk->is_probe() && !veh_def->is_artifact()) {
@@ -1484,7 +1482,7 @@ int __cdecl mod_battle_fight_2(int veh_id_atk, int offset, int tx, int ty, int t
         }
     }
 	}
-	
+
     if (nerve_gas) {
         offense_out += offense_out / 2;
         add_bat(0, 50, label_get(341)); // Nerve Gas
@@ -1762,7 +1760,7 @@ int __cdecl mod_battle_fight_2(int veh_id_atk, int offset, int tx, int ty, int t
         *dword_8C6B3C = 1;
         flush_input();
         if (!shift_key_down() && !(combat_type & CT_CAN_ARTY)) {
-            sub_55A150(veh_id_atk, x, y, offset, 1);
+            veh_scoot(veh_id_atk, x, y, offset, 1);
         }
         stack_put(veh_id_atk, x, y);
         draw_tile(x, y, 2);
@@ -1812,7 +1810,7 @@ int __cdecl mod_battle_fight_2(int veh_id_atk, int offset, int tx, int ty, int t
     int draw_y = 0;
 
     while (veh_atk->cur_hitpoints() > 0 && veh_def->cur_hitpoints() > 0) {
-		
+
 		// [WTP]
 		// correct round odds to match unit strengths
 		/*
@@ -1825,7 +1823,7 @@ int __cdecl mod_battle_fight_2(int veh_id_atk, int offset, int tx, int ty, int t
 		int rand = combat_rand(defense_out + offense_out);
 		if (rand < defense_out) {
 		//
-		
+
             veh_atk->damage_taken += veh_atk_val;
             if (render_battle && damage_mod
             && veh_atk->damage_taken / (veh_atk_val * damage_mod)

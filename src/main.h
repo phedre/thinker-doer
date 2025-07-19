@@ -263,6 +263,8 @@ struct Config {
     int long_range_artillery = 0;
     int modify_upgrade_cost = 0;
     int modify_unit_support = 0;
+    int modify_unit_limit = 0;
+    int max_veh_num = MaxVehNum; // internal variable
     int skip_default_balance = 1; // unlisted option
     int early_research_start = 1; // unlisted option
     int facility_capture_fix = 1; // unlisted option
@@ -318,7 +320,7 @@ struct Config {
     int reduced_mode = 0; // internal variable
     int debug_mode = DEBUG; // internal variable
     int debug_verbose = DEBUG; // internal variable
-    
+
 	//  [WTP]
     bool alternative_weapon_icon_selection_algorithm = false;
     // implemented in Thinker?

@@ -852,10 +852,10 @@ LRESULT WINAPI ModWinProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         flushlog();
 
     }
-    
+
     // [WTP]
     // Ctrl-H automatic hurry
-    
+
     else if (Win_is_visible(BaseWin) && msg == WM_KEYDOWN && wParam == 'H' && ctrl_key_down())
 	{
 		int baseId = *CurrentBaseID;
@@ -864,22 +864,22 @@ LRESULT WINAPI ModWinProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		int mineralCost = mineral_cost(baseId, itemId);
 		int hurryMineralCost = getHurryMineralCost(mineralCost);
 		int hurryMinerals = std::max(0, hurryMineralCost - base->minerals_accumulated);
-		
+
 		if (hurryMinerals > 0)
 		{
 			Faction *faction = &Factions[base->faction_id];
 			int hurryCost = hurry_cost(baseId, itemId, hurryMinerals);
 			int factionAvaialbleCredits = faction->energy_credits - faction->hurry_cost_total;
-			
+
 			if (hurryCost <= factionAvaialbleCredits)
 			{
 				base->minerals_accumulated = hurryMineralCost;
 				faction->energy_credits -= hurryCost;
 				BaseWin_on_redraw(BaseWin);
 			}
-			
+
 		}
-		
+
     } else {
         return WinProc(hwnd, msg, wParam, lParam);
     }
@@ -1523,63 +1523,63 @@ void __thiscall BaseWin_draw_farm_set_font(Buffer* This, Font* font, int a3, int
 void __cdecl BaseWin_draw_psych_strcat(char* buffer, char* source)
 {
     BASE* base = &Bases[*CurrentBaseID];
-	
+
 	// [WTP]
 	// base psych simplified rearranged labels
-	
+
 	if (conf.base_psych && conf.base_psych_improved)
 	{
 		if (!strcmp(source, label_get(323))) // Psych
 		{
 			// replace label #1 with [Facilities]
-			
+
 			strncat(buffer, label_get(324), StrBufLen); // Facilities
-			
+
 		}
 		else
 		if (!strcmp(source, label_get(324))) // Facilities
 		{
 			// replace label #2 with [Police / Pacifism]
-			
+
 			int labelIndex = 325 + (base->SE_police(true) <= -2 ? 1 : 0);
 			strncat(buffer, label_get(labelIndex), StrBufLen); // Police / Pacifism
-			
+
 		}
 		else
 		if (!strcmp(source, label_get(325)) || !strcmp(source, label_get(326))) // Police / Pacifism
 		{
 			// replace label #3 with [Secret Projects]
-			
+
 			strncat(buffer, label_get(327), StrBufLen); // Secret Projects
-			
+
 		}
 		else
 		if (!strcmp(source, label_get(327))) // Secret Projects
 		{
 			// replace label #4 with [Psych]
-			
+
 			strncat(buffer, label_get(323), StrBufLen); // Psych
-			
+
 		}
 		else
 		{
 			if (base->nerve_staple_turns_left > 0 || has_fac_built(FAC_PUNISHMENT_SPHERE, *CurrentBaseID))
 			{
 				// replace label #1 with [Stapled Base] if stapled or Punishment Sphere
-				
+
 				strncat(buffer, label_get(971), StrBufLen); // Stapled Base
-				
+
 			}
 			else
 			{
 				// default value
-				
+
 				strncat(buffer, source, StrBufLen);
-				
+
 			}
-			
+
 		}
-		
+
 	}
 	else
 	{
@@ -1603,7 +1603,7 @@ void __cdecl BaseWin_draw_psych_strcat(char* buffer, char* source)
     }
     strncat(buffer, source, StrBufLen);
 	}
-	
+
 }
 
 void __thiscall BaseWin_draw_energy_set_text_color(Buffer* This, int a2, int a3, int a4, int a5)
@@ -1640,13 +1640,13 @@ void __thiscall BaseWin_draw_energy_set_text_color(Buffer* This, int a2, int a3,
             Buffer_set_text_color(This, ColorEnergy, a3, a4, a5);
             Buffer_write_right_l2(This, buf, 690, 423, LineBufLen);
         }
-		
+
 		// [WTP]
 		// display psych effect
 		else if (conf.base_psych && conf.base_psych_improved)
 		{
 			int psych_effect = max(0, base->psych_total / conf.base_psych_cost);
-			
+
 			if (base->pad_8 != 0 && false)
 			{
 				int psych_effect_allocated = max(0, base->pad_8 / conf.base_psych_cost);
@@ -1656,12 +1656,12 @@ void __thiscall BaseWin_draw_energy_set_text_color(Buffer* This, int a2, int a3,
 			{
 				snprintf(buf, StrBufLen, label_psych_effect, psych_effect);
 			}
-			
+
 			Buffer_set_text_color(This, ColorPsychAlloc, a3, a4, a5);
 			Buffer_write_right_l2(This, buf, 690, 423, LineBufLen);
-			
+
 		}
-		
+
     }
     Buffer_set_text_color(This, a2, a3, a4, a5);
 }
@@ -1939,17 +1939,17 @@ void* This, const char* filename, const char* label, int a4, int a5, int a6, int
     return BasePop_start(This, filename, label, a4, a5, a6, a7);
 }
 
-int __cdecl mod_action_move(int veh_id, int x, int y)
+int __cdecl mod_action_arty(int veh_id, int x, int y)
 {
     VEH* veh = &Vehs[veh_id];
-    
+
 	// [WTP]
 	// disable bombardment if vehicle is land unit at sea and not in a base
 	if (veh->triad() == TRIAD_LAND && is_ocean(mapsq(veh->x, veh->y)) && !mapsq(veh->x, veh->y)->is_base())
 		return 0;
-	
+
     if (*MultiplayerActive) {
-        return action_move(veh_id, x, y);
+        return action_arty(veh_id, x, y);
     }
     if (veh->faction_id == *CurrentPlayerFaction) {
         if (!veh_ready(veh_id)) {

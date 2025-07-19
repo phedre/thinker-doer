@@ -1,6 +1,7 @@
 
 #include "patch.h"
 #include "patchdata.h"
+#include "patchveh.h"
 #include "wtp_patch.h"
 #include <mutex>
 
@@ -374,6 +375,11 @@ static void init_video_config(Config* cf) {
             }
         }
     }
+
+    if (!FileExists("modmenu.txt")) {
+        MessageBoxA(0, "Error while opening modmenu.txt. Game might not work as intended.",
+            MOD_VERSION, MB_OK | MB_ICONWARNING);
+    }
 }
 
 bool patch_setup(Config* cf) {
@@ -405,11 +411,26 @@ bool patch_setup(Config* cf) {
     // Apply Scient's Patch changes first
     for (auto& item : AXPatchData) {
         uint8_t* addr = (uint8_t*)(item.address);
-        if(*addr != item.old_byte && *addr != item.new_byte
+        if (*addr != item.old_byte && *addr != item.new_byte
         && (addr < AXSkipVerifyStart || addr > AXSkipVerifyEnd)) {
             exit_fail((int)addr);
         }
         *addr = item.new_byte;
+    }
+    if (conf.modify_unit_limit) {
+        for (auto& item : VehPatchData) {
+            int32_t* addr = (int32_t*)item[0];
+            if (*addr == (int)VehsDef + (int)item[1] && item[1] <= sizeof(VEH)) {
+                *addr += ((int)VehsMod - (int)VehsDef);
+            } else {
+                exit_fail((int)addr);
+            }
+        }
+        write_word(0x5C03DE, 2048, MaxVehModNum); // veh_init
+        write_word(0x5C09C8, 2048, MaxVehModNum); // veh_kill
+        write_word(0x522610, 1792, (MaxVehModNum*3)/4); // alien_fauna
+        cf->max_veh_num = MaxVehModNum;
+        Vehs = VehsMod;
     }
     extra_setup(cf);
 
@@ -534,6 +555,7 @@ bool patch_setup(Config* cf) {
     write_jump(0x5C1540, (int)veh_speed);
     write_jump(0x5C1C40, (int)mod_veh_jail);
     write_jump(0x5C1D20, (int)mod_veh_skip);
+    write_jump(0x5C1D50, (int)mod_veh_fake);
     write_jump(0x5C1D70, (int)mod_veh_wake);
     write_jump(0x626250, (int)log_say2);
     write_jump(0x6262F0, (int)log_say);
@@ -1419,8 +1441,7 @@ bool patch_setup(Config* cf) {
     if (cf->skip_default_balance) {
         remove_call(0x5B41F5); // setup_game
         // Remove aquatic faction extra sea colony pod in setup_player
-        const byte old_bytes[] = {0x66,0x89,0xB1,0x56,0x28,0x95,0x00};
-        write_bytes(0x5B3060, old_bytes, NULL, sizeof(old_bytes));
+        memset((void*)0x5B3060, 0x90, 7);
         remove_call(0x5B3052);
         remove_call(0x5B3067);
     }
@@ -1432,8 +1453,8 @@ bool patch_setup(Config* cf) {
         write_call(0x5082B7, (int)battle_fight_parse_num);
     }
     if (cf->long_range_artillery > 0) {
-        write_call(0x46D42F, (int)mod_action_move); // MapWin::right_menu
-        write_call(0x46E1FF, (int)mod_action_move); // MapWin::click
+        write_call(0x46D42F, (int)mod_action_arty); // MapWin::right_menu
+        write_call(0x46E1FF, (int)mod_action_arty); // MapWin::click
 
         const byte old_cursor[] = {0x8B,0x0D,0x44,0x97,0x94,0x00,0x51};
         const byte new_cursor[] = {0x57,0x90,0x90,0x90,0x90,0x90,0x90};
@@ -1442,7 +1463,7 @@ bool patch_setup(Config* cf) {
 
         const byte old_menu[] = {
             0x8B,0x45,0xF0,0x6A,0x01,0x8D,0x0C,0x40,0x8D,0x14,
-            0x88,0x0F,0xBF,0x04,0x95,0x32,0x28,0x95,0x00,0x50,
+            0x88,0x0F,0xBF,0x04,0x95,0x00,0x00,0x00,0x00,0x50,
             0xE8,0x82,0x43,0x15,0x00,0x83,0xC4,0x08,0x85,0xC0
         };
         const byte new_menu[] = {
@@ -1450,6 +1471,7 @@ bool patch_setup(Config* cf) {
             0xF0,0x50,0xE8,0x00,0x00,0x00,0x00,0x83,0xC4,0x0C,
             0x85,0xC0,0x75,0x6E,0xE9,0x8E,0x00,0x00,0x00,0x90
         };
+        memset((void*)0x46CA24, 0, 4);
         write_bytes(0x46CA15, old_menu, new_menu, sizeof(new_menu));
         write_call(0x46CA21, (int)MapWin_right_menu_arty);
     }
@@ -1658,10 +1680,10 @@ bool patch_setup(Config* cf) {
         write_bytes(0x526540, old_bytes, new_bytes, sizeof(new_bytes));
     }
     */
-    
+
     // [WTP]
     patch_setup_wtp(cf);
-	
+
     if (!VirtualProtect(AC_IMAGE_BASE, AC_IMAGE_LEN, PAGE_EXECUTE_READ, &attrs)) {
         return false;
     }

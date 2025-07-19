@@ -249,7 +249,7 @@ void __cdecl mod_base_support() {
 
     // [WTP] alternative support
     // change free unit limit
-    
+
     int SupportCosts[8][2]  = {
         {2, 0}, // -4, Each unit costs 2 to support; no free minerals for new base.
         {1, 0}, // -3, Each unit costs 1 to support; no free minerals for new base.
@@ -270,7 +270,7 @@ void __cdecl mod_base_support() {
         {1, 6}, //  2, Support 6 units free per base!
         {1, max((int)base->pop_size, 8)}, // 3, Support 8 units OR up to base size for free!!
     };
-    
+
     if (conf.alternative_support)
 	{
 		for (int i = 0; i < 8; i ++)
@@ -281,9 +281,9 @@ void __cdecl mod_base_support() {
 			}
 		}
 	}
-	
+
     // [WTP] alternative support - end
-    
+
     const int support_val = clamp(f->SE_support_pending + 4, 0, 7);
     const int support_mod = (is_human(base->faction_id) ? 0 : conf.unit_support_bonus[*DiffLevel]);
     const int support_type = (conf.modify_unit_support == 1 ? PLAN_SUPPLY :
@@ -457,11 +457,11 @@ static void base_update(BASE* base, std::vector<TileValue>& tiles) {
 }
 
 void __cdecl mod_base_yield() {
-	
+
 	// [WTP]
 	// replace with WTP version
 	return wtp_mod_base_yield();
-	
+
     BASE* base = *CurrentBase;
     int base_id = *CurrentBaseID;
     int faction_id = base->faction_id;
@@ -715,7 +715,7 @@ void __cdecl mod_base_minerals() {
     if (has_project(FAC_PHOLUS_MUTAGEN, faction_id)) {
         eco_dmg_reduction++;
     }
-    
+
     // [WTP]
     // corrected eco-damage industry effect formula
     /*
@@ -727,7 +727,7 @@ void __cdecl mod_base_minerals() {
 		(base->mineral_intake_2 - clamp(Factions[faction_id].satellites_mineral, 0, (int)base->pop_size)) / eco_dmg_reduction
 		- clean_minerals_total
 	;
-	
+
     if (is_human(faction_id)) {
         base->eco_damage += ((Factions[faction_id].major_atrocities
             + TectonicDetonationCount[faction_id]) * 5) / (clamp(*MapSeaLevel, 0, 100)
@@ -888,7 +888,7 @@ void __cdecl mod_base_energy() {
         coeff_labs += 2;
         coeff_psych += 1;
     }
-    
+
     // [WTP]
     // custom values
     /*
@@ -922,7 +922,7 @@ void __cdecl mod_base_energy() {
         coeff_labs += conf.energy_multipliers_temple_of_planet[2];
     }
     //
-    
+
     if (has_fac_built(FAC_FUSION_LAB, base_id)) {
         coeff_labs += 2;
         coeff_econ += 2;
@@ -935,7 +935,7 @@ void __cdecl mod_base_energy() {
     base->economy_total = (coeff_econ * base->economy_total + 3) / 4;
     base->psych_total = (coeff_psych * base->psych_total + 3) / 4;
     base->unk_total = (coeff_econ * base->unk_total + 3) / 4;
-    
+
     // [WTP]
     // science projects alternative labs bonus
     if (conf.science_projects_alternative_labs_bonus)
@@ -962,7 +962,7 @@ void __cdecl mod_base_energy() {
         base->labs_total *= 2;
     }
 	}
-    
+
     if (project_base(FAC_SPACE_ELEVATOR) == base_id) {
         base->economy_total *= 2;
     }
@@ -1078,14 +1078,14 @@ static void adjust_drone(BASE* base, int drone_val) {
 }
 
 void __cdecl mod_base_psych(int base_id) {
-	
+
 	// [WTP]
 	// replace with improved version
 	if (conf.base_psych_improved)
 	{
 		return wtp_mod_base_psych(base_id);
 	}
-	
+
     BASE* base = &Bases[base_id];
     Faction* f = &Factions[base->faction_id];
     MFaction* m = &MFactions[base->faction_id];
@@ -1334,7 +1334,7 @@ int __cdecl mod_base_growth() {
     bool allow_growth = base->pop_size < pop_limit || has_dome;
 
     if (base->nutrients_accumulated >= 0) {
-		
+
 		// [WTP]
 		// rewrite/simplify population boom condition
 		if (base_pop_boom(base_id) && (Rules->nutrient_intake_req_citizen && base->nutrient_surplus >= Rules->nutrient_intake_req_citizen))
@@ -1351,7 +1351,7 @@ int __cdecl mod_base_growth() {
                 return 0;
             } // Display population limit notifications later
         }
-        
+
         // [WTP]
         // accumulate nutrients before base growth
         int nutrients_carryover = 0;
@@ -1361,21 +1361,21 @@ int __cdecl mod_base_growth() {
 			base->nutrients_accumulated = std::min(nutrient_cost, nutrients_accumulated_total);
 			nutrients_carryover = std::min(nutrient_cost, nutrients_accumulated_total - base->nutrients_accumulated);
 		}
-        
+
         if (base->nutrients_accumulated >= nutrient_cost) {
-			
+
 			// [WTP]
 			// rewrite stagnation condition
             if (*BaseGrowthRate < conf.se_growth_rating_min) {
                 base->nutrients_accumulated = nutrient_cost;
                 return 0;
             }
-			
+
             if (allow_growth) {
                 if (base->pop_size < MaxBasePopSize) {
                     base->pop_size++;
                 }
-                
+
                 // [WTP]
                 // carryover nutrients
                 if (conf.carry_over_nutrients)
@@ -1386,7 +1386,7 @@ int __cdecl mod_base_growth() {
 				{
 					base->nutrients_accumulated = 0;
 				}
-                
+
                 base_compute(1);
                 draw_tile(base->x, base->y, 2);
             } else if (base->pop_size >= pop_limit) {
@@ -1405,14 +1405,14 @@ int __cdecl mod_base_growth() {
                 base->nutrients_accumulated = nutrient_cost / 2;
             }
         }
-        
+
         // [WTP]
         // do not accumulate nutrients after base growth
         if (!conf.carry_over_nutrients)
 		{
 			base->nutrients_accumulated += base->nutrient_surplus;
 		}
-        
+
         if (base->nutrient_surplus >= 0
         || base->nutrients_accumulated < base->nutrient_surplus
         || base->nutrients_accumulated + 5 * base->nutrient_surplus >= 0
@@ -1494,11 +1494,11 @@ int __cdecl mod_base_growth() {
 }
 
 void __cdecl mod_drone_riot() {
-	
+
 	// [WTP]
 	// Somehow this stack is used and crashes the program if it is not initialized with zeroes.
 	clear_stack(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-	
+
     BASE* base = *CurrentBase;
     Faction* f = &Factions[base->faction_id];
     MFaction* m = &MFactions[base->faction_id];
@@ -2045,14 +2045,14 @@ int mineral_cost(int base_id, int item_id) {
 }
 
 int hurry_cost(int base_id, int item_id, int hurry_mins) {
-	
+
 	// [WTP]
 	// flat hurry cost
 	if (conf.flat_hurry_cost)
 	{
 		return wtp_flat_hurry_cost(base_id, item_id, hurry_mins);
 	}
-	
+
     BASE* b = &Bases[base_id];
     MFaction* m = &MFactions[b->faction_id];
     int mins = max(0, mineral_cost(base_id, item_id) - b->minerals_accumulated);
@@ -2115,11 +2115,11 @@ int stockpile_energy_active(int base_id) {
 
 int terraform_eco_damage(int base_id) {
     BASE* base = &Bases[base_id];
-    
+
     // [WTP]
     // replace with WTP version
     return wtp_terraform_eco_damage(base_id);
-    
+
     int modifier = (has_fac_built(FAC_TREE_FARM, base_id) != 0)
         + (has_fac_built(FAC_HYBRID_FOREST, base_id) != 0);
     int value = 0;
@@ -2151,26 +2151,26 @@ int terraform_eco_damage(int base_id) {
 
 int mineral_output_modifier(int base_id) {
     int value = 0;
-    
+
     // [WTP]
     // Recycling Tanks can be a mineral multiplying facility
     if (conf.recycling_tanks_mineral_multiplier && has_facility(FAC_RECYCLING_TANKS, base_id)) {
         value++;
     }
-    
+
     if (has_facility(FAC_QUANTUM_CONVERTER, base_id)) {
         value++; // The Singularity Inductor also possible
     }
     if (has_fac_built(FAC_ROBOTIC_ASSEMBLY_PLANT, base_id)) {
         value++;
     }
-    
+
     // [WTP]
     // Genejack Factory can be NOT a mineral multiplying facility
     if (conf.genejack_factory_mineral_multiplier && has_fac_built(FAC_GENEJACK_FACTORY, base_id)) {
         value++;
     }
-    
+
     if (has_fac_built(FAC_NANOREPLICATOR, base_id)) {
         value++;
     }
@@ -2492,11 +2492,11 @@ int __cdecl mod_facility_avail(FacilityId item_id, int faction_id, int base_id, 
     }
     switch (item_id) {
     case FAC_RECYCLING_TANKS:
-    	
+
     	// [WTP]
     	// allow building Recycle Tanks if it is not included into Pressure Dome
         return !conf.pressure_dome_recycling_tanks_bonus || !has_fac(FAC_PRESSURE_DOME, base_id, queue_count); // count as Recycling Tank, skip
-        
+
     case FAC_TACHYON_FIELD:
         return has_fac(FAC_PERIMETER_DEFENSE, base_id, queue_count)
             || has_project(FAC_CITIZENS_DEFENSE_FORCE, faction_id); // Cumulative
@@ -2675,7 +2675,7 @@ bool can_build_unit(int base_id, int unit_id) {
     && !adjacent_region(b->x, b->y, -1, 10, TRIAD_SEA)) {
         return false;
     }
-    return (*VehCount + 64 < MaxVehNum) || (*VehCount + random(64) < MaxVehNum);
+    return (*VehCount + 64 < conf.max_veh_num) || (*VehCount + random(64) < conf.max_veh_num);
 }
 
 bool can_staple(int base_id) {
@@ -2696,11 +2696,11 @@ bool base_can_riot(int base_id, bool allow_staple) {
 }
 
 bool base_pop_boom(int base_id) {
-	
+
 	// [WTP]
 	// use WTP version
 	return wtp_base_pop_boom(base_id);
-	
+
     BASE* b = &Bases[base_id];
     Faction* f = &Factions[b->faction_id];
     if (b->nutrient_surplus < Rules->nutrient_intake_req_citizen) {
@@ -2840,7 +2840,7 @@ int __cdecl fac_maint(int facility_id, int faction_id) {
 
 void clear_stack(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)
 {
-	
+
 }
 
 /*
@@ -2856,24 +2856,24 @@ int __cdecl mod_popb(char const *label, int flags, int sound_id, char const *pcx
 	{
 		return popb(label, flags, sound_id, pcx_filename, a5);
 	}
-	
+
 }
 
 double computeBaseTileScore(bool restrictions, double growthFactor, double energyValue, bool can_grow, int nutrientSurplus, int mineralSurplus, int energySurplus, int tileValueNutrient, int tileValueMineral, int tileValueEnergy)
 {
 //	debug("computeBaseTileScore gF=%7.4f eV=%5.2f nS=%2d, mS=%2d eS=%2d n=%2d m=%2d e=%2d\n", growthFactor, energyValue, nutrientSurplus, mineralSurplus, energySurplus, tileValueNutrient, tileValueMineral, tileValueEnergy);
-	
+
 	double nutrient = (1.0 + conf.worker_algorithm_nutrient_preference) * (double)tileValueNutrient;
 	double mineral = (1.0 + conf.worker_algorithm_mineral_preference) * (double)tileValueMineral;
 	double energy = (1.0 + conf.worker_algorithm_energy_preference) * (double)tileValueEnergy;
-	
+
 	double growthMultiplier = conf.worker_algorithm_growth_multiplier * (can_grow ? 1.0 : 0.1);
 	int minimalNutrientSurplus = can_grow ? conf.worker_algorithm_minimal_nutrient_surplus : 0;
 	int minimalMineralSurplus = conf.worker_algorithm_minimal_mineral_surplus;
 	int minimalEnergySurplus = conf.worker_algorithm_minimal_energy_surplus;
-	
+
 	double score = 0.0;
-	
+
 	if (restrictions && nutrientSurplus < minimalNutrientSurplus)
 	{
 		score = 10.0 * nutrient + mineral + energyValue * energy;
@@ -2891,23 +2891,23 @@ double computeBaseTileScore(bool restrictions, double growthFactor, double energ
 		double nutrientSurplusFinal = (double)nutrientSurplus + nutrient;
 		double mineralSurplusFinal = (double)mineralSurplus + mineral;
 		double energySurplusFinal = (double)energySurplus + energy;
-		
+
 		double oldIncome = mineralSurplus + energyValue * energySurplus;
 		double oldIncomeGrowth = growthFactor * nutrientSurplus * oldIncome;
-		
+
 		double oldIncomeGain = oldIncome;
 		double oldIncomeGrowthGain = growthMultiplier * oldIncomeGrowth;
 		double oldGain = oldIncomeGain + oldIncomeGrowthGain;
-		
+
 		double newIncome = mineralSurplusFinal + energyValue * energySurplusFinal;
 		double newIncomeGrowth = growthFactor * nutrientSurplusFinal * newIncome;
-		
+
 		double newIncomeGain = newIncome;
 		double newIncomeGrowthGain = growthMultiplier * newIncomeGrowth;
 		double newGain = newIncomeGain + newIncomeGrowthGain;
-		
+
 		score = newGain - oldGain;
-		
+
 //		debug
 //		(
 //			"\tincome=%5.2f"
@@ -2922,23 +2922,23 @@ double computeBaseTileScore(bool restrictions, double growthFactor, double energ
 //			, incomeGrowthGain
 //			, gain
 //		);
-		
+
 	}
 //	flushlog();
-	
+
 	return score;
-	
+
 }
 
 int getBasePsychCoefficient(int baseId)
 {
 	assert(baseId >= 0 && baseId < *BaseCount);
-	
+
 	BASE &base = Bases[baseId];
 	int factionId = base.faction_id;
-	
+
 	int psychCoefficient = 4;
-	
+
 	if (has_fac_built(FAC_HOLOGRAM_THEATRE, baseId) || (has_project(FAC_VIRTUAL_WORLD, factionId) && has_fac_built(FAC_NETWORK_NODE, baseId)))
 	{
 		psychCoefficient += 2;
@@ -2967,8 +2967,8 @@ int getBasePsychCoefficient(int baseId)
 	{
 		psychCoefficient += conf.energy_multipliers_temple_of_planet[1];
 	}
-	
+
 	return psychCoefficient;
-	
+
 }
 
